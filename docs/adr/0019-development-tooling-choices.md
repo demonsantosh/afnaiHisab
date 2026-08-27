@@ -1,13 +1,13 @@
 # ADR-0019: Development tooling choices (JDK, lint, DB migrations, web tooling, CI)
 
 ## Status
-Accepted
+Accepted, amended 2026-08-27 (JDK pick only — see below)
 
 ## Context
 Several concrete tool choices were implied but never decided across earlier ADRs: which JDK version, how database schema migrations happen (Exposed alone doesn't provide this), Kotlin lint/formatting enforcement, the web package manager and test framework, how the KMP framework gets embedded into the iOS Xcode project, and which CI provider/source host actually runs ADR-0017's enforced test gate. A local environment check (2026-08-27) found JDK 17 (Corretto), Node 20, Android SDK, and Xcode 26.6 already installed — Docker and a git repository are not.
 
 ## Decision
-- **JDK 17 LTS** (Amazon Corretto 17.0.9, already installed at `~/Library/Java/JavaVirtualMachines/corretto-17.0.9`) — proven, fully supported by Gradle/Kotlin/Ktor, zero new install required.
+- **JDK 17 LTS** — originally Corretto 17.0.9; **amended to Homebrew `openjdk@17` (17.0.15)** after Phase 0 scaffolding hit a stale-`cacerts`/corporate-TLS-proxy issue specific to the manually-installed, never-updated Corretto build (full incident and fix in `docs/TOOLING.md`). Homebrew-managed gets refreshed via `brew upgrade`, which is real protection against this recurring.
 - **DB migrations: Flyway.** Plain versioned SQL files, pairs cleanly with Exposed/JDBC, simpler than Liquibase's XML/YAML changesets — matches the project's general preference for plain-SQL-first tooling (same reasoning as ADR-0006's SQLDelight pick).
 - **Kotlin lint/format: ktlint.** Enforces the official Kotlin style guide directly — matches `AGENTS.md`'s existing "official Kotlin style guide" line with an actual enforcement mechanism, rather than detekt's heavier, more configurable code-smell/complexity focus (not needed at this project's current scale).
 - **Web package manager: npm.** Already installed, zero extra setup. pnpm's speed/disk-efficiency benefits matter more at multi-package monorepo scale than for one Next.js app in Phase 1 — not worth an extra install for a benefit this project doesn't need yet.

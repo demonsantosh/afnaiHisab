@@ -8,6 +8,8 @@
 
 **Sequencing**: Localhost web app first. Every later platform (deploy, Android, iOS, offline) is added one at a time, on top of a domain model designed up front to not need reshaping.
 
+**Cost: $0 through Phase 2 staging.** Every tool (JDK, Kotlin, Gradle, Ktor, Next.js, H2/Postgres, Android Studio, Xcode, IntelliJ Community, ktlint, Flyway — full list in `docs/TOOLING.md`) and every hosting service used up to and including staging (Koyeb, Neon, Vercel Hobby, GitHub + Actions — ADR-0018) is free, no credit card required anywhere in that chain. The only point a cost can enter is a deliberate decision at Phase 2's production-promotion gate (ADR-0018) — never before, and never by default.
+
 ## 2. Locked decisions (see docs/adr/)
 
 | # | Decision |

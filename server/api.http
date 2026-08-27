@@ -1,0 +1,26 @@
+# Manual API checks — IntelliJ HTTP client (ADR-0019), committed alongside the endpoints it tests.
+# Open in IntelliJ IDEA and click the gutter arrow, or run with the `ijhttp` CLI.
+# Add a request block here whenever a route is added, so the endpoint surface is always
+# exercisable without a browser or curl incantation.
+
+@host = http://localhost:8080
+@webOrigin = http://localhost:3000
+
+### Health — 200 while every dependency is up, 503 once one is not.
+GET {{host}}/api/v1/health
+Accept: application/json
+
+### Health, as the browser sees it: same request with the web app's Origin, so the response must
+### carry Access-Control-Allow-Origin (ADR-0015's allow-list).
+GET {{host}}/api/v1/health
+Accept: application/json
+Origin: {{webOrigin}}
+
+### CORS preflight from an origin that is NOT on the allow-list — must be refused with 403.
+OPTIONS {{host}}/api/v1/health
+Origin: http://evil.example.com
+Access-Control-Request-Method: GET
+
+### Unknown route — must return the standard error envelope, not an HTML/plain-text 404.
+GET {{host}}/api/v1/does-not-exist
+Accept: application/json

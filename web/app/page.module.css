@@ -1,0 +1,126 @@
+.page {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  min-height: 100vh;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: 42rem;
+}
+
+.title {
+  font-size: 2rem;
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.muted {
+  color: #6b7280;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cardHeader h2 {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.button {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  border-color: #9ca3af;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.endpoint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+  overflow-wrap: anywhere;
+}
+
+.status {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.good {
+  border-left: 3px solid #16a34a;
+  padding-left: 0.9rem;
+}
+
+.bad {
+  border-left: 3px solid #dc2626;
+  padding-left: 0.9rem;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.details dt {
+  color: #6b7280;
+}
+
+.details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-color-scheme: dark) {
+  .muted,
+  .endpoint,
+  .details dt {
+    color: #9ca3af;
+  }
+
+  .card {
+    border-color: #262626;
+  }
+
+  .button {
+    border-color: #3f3f46;
+  }
+
+  .button:hover:not(:disabled) {
+    border-color: #71717a;
+  }
+}
