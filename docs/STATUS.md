@@ -28,14 +28,14 @@ Last updated: 2026-08-27
   - ktlint wired into `check` for both `core` and `server`, whole tree clean.
 
 ## In progress
-Nothing. Phase 0 scaffolding reviewed and committed on branch `phase-0/kmp-monorepo-scaffold` (`main` untouched, per the feature-branch-only rule) — awaiting a GitHub remote to actually open a PR against.
+GitHub remote is live: https://github.com/demonsantosh/afnaiHisab. Both `main` and `phase-0/kmp-monorepo-scaffold` pushed. PR not opened yet, branch protection not configured — both are manual/web-UI steps, not something done from here.
 
 ## Not started
 - Phase 1 application code — auth, ledgers, expenses, splits, settlements, balances (`docs/PLAN.md` §5)
 - `core/src/commonTest` — no domain tests yet, because Phase 0 added types only, no logic
 
 ## Next concrete step
-Create the GitHub remote, push `phase-0/kmp-monorepo-scaffold`, open a PR into `main`, and turn on branch protection so ADR-0017's test gate actually blocks merges (the CI workflow exists but has never run — a workflow file alone doesn't enforce anything without a required-checks rule). After that, Phase 1 begins with a `docs/specs/<feature>.md` for expense/split/balance (ADR-0016) — the money-math lane ADR-0017 flags for human review — before any implementation.
+Open the PR (https://github.com/demonsantosh/afnaiHisab/pull/new/phase-0/kmp-monorepo-scaffold), let CI actually run for the first time, then in GitHub Settings → Branches add a protection rule on `main` requiring the CI jobs to pass before merge — this is what turns ADR-0017's test gate from a workflow file into an enforced one. After that, Phase 1 begins with a `docs/specs/<feature>.md` for expense/split/balance (ADR-0016) — the money-math lane ADR-0017 flags for human review — before any implementation.
 
 ## Update discipline
 Update this file at the end of every work session — phase changes, milestones hit, or scope changes. This file (not git log or memory) is the source of truth for "where are we."
