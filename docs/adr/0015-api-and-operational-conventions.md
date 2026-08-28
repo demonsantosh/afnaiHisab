@@ -1,7 +1,10 @@
 # ADR-0015: API versioning, pagination, error format, CORS, secrets, rate limiting
 
 ## Status
-Accepted
+Accepted, amended 2026-08-28 (RFC 9457 note only — the decision is unchanged)
+
+## Amendment (2026-08-28)
+A best-practice audit flagged that our custom `{"error":{"code","message"}}` envelope was decided without checking it against **RFC 9457** (2023), the current IETF standard for HTTP API problem details (`application/problem+json`, `type`/`title`/`status`/`detail`/`instance`) — RFC 9457 obsoletes the older RFC 7807. Considered and rejected: RFC 9457 optimizes for third-party client interoperability (a generic HTTP client can parse any RFC 9457-compliant API); this project has no third-party consumers, only its own web/mobile clients, for which a uniform, simpler shape matters more. Recorded explicitly so this is a decision, not an oversight.
 
 ## Context
 A documentation review surfaced several operational concerns with no owner anywhere in the docs: Phase 0's "done when" criteria has web and server as separate local origins (different ports) with no CORS decision; nothing states how JWT signing keys or DB credentials are stored/loaded across local dev vs. deployed environments; there's no API versioning, pagination, or error-response convention despite Phase 2 planning unbounded lists (audit log, expense history); and no rate limiting is planned despite auth endpoints being the obvious abuse target. These are standard engineering defaults, not product/business decisions — deciding them now avoids Phase 1/2 improvising inconsistent one-off answers per endpoint.

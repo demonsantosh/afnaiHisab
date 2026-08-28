@@ -58,10 +58,14 @@ dependencies {
 }
 
 // `/api/v1/health` reports the built version; substitute it here so it can never drift from
-// the Gradle project version.
+// the Gradle project version. Read via `inputs.property` + `inputs.properties[...]`, not a
+// captured local — the configuration cache can serialize a task's own declared inputs, but a
+// build-script-level `val` referenced from a nested execution-time lambda captures a reference to
+// the (unserializable) script object itself, not just the value.
 tasks.processResources {
+    inputs.property("appVersion", project.version.toString())
     filesMatching("build-info.properties") {
-        expand("version" to project.version.toString())
+        expand(mapOf("version" to inputs.properties["appVersion"]))
     }
 }
 

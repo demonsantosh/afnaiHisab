@@ -59,7 +59,9 @@ class MigrationTest {
                         resultSet.getString(1)
                     }
                 }
-            assertTrue(version == "1", "expected schema version 1, got $version")
+            // Bump this when a new migration lands (currently V2 — see V2__add_missing_fk_indexes.sql)
+            // so this test keeps proving "re-running migrate is a no-op," not "we're still on V1."
+            assertTrue(version == "2", "expected latest schema version 2, got $version")
         }
     }
 }

@@ -8,7 +8,9 @@ Every money field (`Expense.amount`, `Split.amount`, `Settlement.amount`) is a *
 
 ## ID strategy
 
-UUIDv7 for every entity's primary key — time-sortable, which makes it a natural cursor for ADR-0015's cursor-based pagination without a separate sequence/timestamp column.
+UUIDv7 for every entity's primary key — time-sortable, which makes it a natural cursor for ADR-0015's cursor-based pagination without a separate sequence/timestamp column. Confirmed by a 2026 best-practice audit as the currently-recommended choice over both UUIDv4 (worse index locality) and bare bigint (no natural pagination cursor).
+
+**Monitored risk, not a current problem**: implemented via `kotlin.uuid.Uuid`, which is still `@ExperimentalUuidApi` — JetBrains' own docs note binary-incompatibility risk before stabilization (tracked, unresolved, in [KT-31880](https://youtrack.jetbrains.com/issue/KT-31880)). Acceptable for an application with no external consumers to break (unlike a published library), but every entity id in `core` depends on it, so a breaking stdlib change would ripple everywhere. No mitigation action needed now — just don't let this become a silent assumption. Re-check this note if upgrading the Kotlin version ever mentions `kotlin.uuid` changes in its release notes.
 
 ## Entities
 

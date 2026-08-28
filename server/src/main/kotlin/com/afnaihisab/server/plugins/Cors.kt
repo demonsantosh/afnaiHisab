@@ -40,6 +40,10 @@ fun Application.configureCors(config: AppConfig) {
         // Phase 1 sends the JWT access token as a Bearer header (ADR-0008), not a cookie — which is
         // also why `allowCredentials` stays off.
         allowHeader(HttpHeaders.Authorization)
+
+        // Without this, browsers re-run the OPTIONS preflight before every single request. 1 hour
+        // is a conservative cache — the allow-list itself only changes via a deploy, not at runtime.
+        maxAgeInSeconds = 3600
     }
 
     log.info("CORS allow-list: {}", config.corsAllowedOrigins.joinToString())
