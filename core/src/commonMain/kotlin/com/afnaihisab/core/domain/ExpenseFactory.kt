@@ -1,5 +1,6 @@
 package com.afnaihisab.core.domain
 
+import com.afnaihisab.core.validation.ValidationError
 import com.afnaihisab.core.validation.ValidationResult
 import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
@@ -36,19 +37,17 @@ data class ExpenseWithSplits(
  * Creates an [Expense] with an equal split across [members]
  * (`docs/specs/expense-split-balance.md` AC-1..AC-5).
  *
- * **Not yet implemented — TDD red phase (ADR-0009).** `TODO()` deliberately throws so every test
- * in `ExpenseSplittingTest` fails at runtime (not at compile time) until a later pass implements
- * the real allocation + validation logic. This is a human-review lane (ADR-0017) — the rounding
- * rule below must be implemented exactly as specified, not approximated.
+ * This is a human-review lane (ADR-0017) — the rounding rule below is implemented exactly as
+ * specified, not approximated.
  *
- * Expected behavior for the next pass:
+ * Behavior:
  * - AC-1: exactly one [Split] per entry in [members], `splits.sumOf { it.amount } == amount`.
  * - AC-2 (largest-remainder method, `docs/FEATURES.md` §a): let `n = members.size`,
  *   `base = amount / n`, `remainder = (amount % n)`. Every member's split starts at `base`; the
  *   `remainder` members with the *largest fractional remainder* each get one extra minor unit.
  *   Because every member has an identical equal share, every fractional remainder is identical —
- *   so the tie always applies, and is broken by **ascending `membershipId`**: sort [members] by
- *   `id` ascending and give the first `remainder` of them `base + 1`, the rest `base`.
+ *   so the tie always applies, and is broken by **ascending `membershipId`**: [members] sorted by
+ *   `id` ascending, the first `remainder` of them get `base + 1`, the rest get `base`.
  * - AC-3: `amount <= 0` -> `Invalid` with one error, `field = "amount"`,
  *   `code = `[ExpenseValidationCodes.AMOUNT_NOT_POSITIVE]`, and no [Expense]/[Split] is
  *   constructed.
@@ -57,7 +56,8 @@ data class ExpenseWithSplits(
  *   `field = "payerMembershipId"`, `code = `[ExpenseValidationCodes.PAYER_NOT_MEMBER]`.
  * - AC-5: `currency != ledger.defaultCurrency` -> `Invalid`, `field = "currency"`,
  *   `code = `[ExpenseValidationCodes.CURRENCY_MISMATCH]`. Phase 1 has no conversion.
- * - Multiple violations may be reported together (`ValidationResult.Invalid.errors` is a list).
+ * - Multiple violations are reported together (`ValidationResult.Invalid.errors` is a list) —
+ *   validation runs to completion before any rejection is returned.
  *
  * @param members the ledger's *current* members — determines `n` for AC-2 and is what AC-4
  *   validates [payerMembershipId] against.
@@ -66,12 +66,11 @@ data class ExpenseWithSplits(
  *   can assert on exact ids with deterministic input, per this project's ban on non-deterministic
  *   tests (`docs/adr/0009-testing-strategy.md`).
  *
- * `@Suppress`: `UnusedParameter` because the body is a deliberate red-phase `TODO()` (ADR-0009) —
- * the signature is the contract the implementing pass is written against. `LongParameterList`
- * because an expense genuinely carries this much data, and `newId` is injected rather than called
- * internally so tests stay deterministic; every call site uses named arguments.
+ * `@Suppress("LongParameterList")`: an expense genuinely carries this much data, and `newId` is
+ * injected rather than called internally so tests stay deterministic; every call site uses named
+ * arguments.
  */
-@Suppress("UnusedParameter", "LongParameterList")
+@Suppress("LongParameterList")
 fun createEqualSplitExpense(
     ledger: Ledger,
     members: List<Membership>,
@@ -83,8 +82,69 @@ fun createEqualSplitExpense(
     date: LocalDate,
     createdAt: Instant,
     newId: () -> Uuid = { Uuid.random() },
-): ValidationResult<ExpenseWithSplits> =
-    TODO(
-        "AC-1..AC-5 (docs/specs/expense-split-balance.md): equal-split expense creation with " +
-            "largest-remainder rounding — implemented by a later pass, not this red-phase stub.",
-    )
+): ValidationResult<ExpenseWithSplits> {
+    val errors = mutableListOf<ValidationError>()
+
+    if (amount.value <= 0L) {
+        errors +=
+            ValidationError(
+                field = "amount",
+                code = ExpenseValidationCodes.AMOUNT_NOT_POSITIVE,
+                message = "amount must be positive",
+            )
+    }
+
+    val payer = members.find { it.id == payerMembershipId }
+    if (payer == null || payer.ledgerId != ledger.id) {
+        errors +=
+            ValidationError(
+                field = "payerMembershipId",
+                code = ExpenseValidationCodes.PAYER_NOT_MEMBER,
+                message = "payerMembershipId must belong to the target ledger",
+            )
+    }
+
+    if (currency != ledger.defaultCurrency) {
+        errors +=
+            ValidationError(
+                field = "currency",
+                code = ExpenseValidationCodes.CURRENCY_MISMATCH,
+                message = "currency must match the ledger's defaultCurrency",
+            )
+    }
+
+    if (errors.isNotEmpty()) return ValidationResult.Invalid(errors)
+
+    val expenseId = newId()
+    val memberCount = members.size
+    val base = amount / memberCount
+    val remainder = (amount % memberCount).value.toInt()
+    val extraShareRecipients =
+        members
+            .sortedBy { it.id }
+            .take(remainder)
+            .map { it.id }
+            .toSet()
+
+    val splits =
+        members.map { member ->
+            val splitAmount = if (member.id in extraShareRecipients) base + MinorUnits(1L) else base
+            Split(id = newId(), expenseId = expenseId, membershipId = member.id, amount = splitAmount)
+        }
+
+    val expense =
+        Expense(
+            id = expenseId,
+            ledgerId = ledger.id,
+            payerMembershipId = payerMembershipId,
+            amount = amount,
+            currency = currency,
+            category = category,
+            note = note,
+            date = date,
+            createdAt = createdAt,
+            splitType = SplitType.EQUAL,
+        )
+
+    return ValidationResult.Valid(ExpenseWithSplits(expense, splits))
+}

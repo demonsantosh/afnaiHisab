@@ -5,11 +5,9 @@ package com.afnaihisab.core.domain
  * [Settlement]s — **never stored** (`docs/specs/expense-split-balance.md` AC-6, AC-7;
  * `docs/domain-model.md` "Derived (never stored)").
  *
- * **Not yet implemented — TDD red phase (ADR-0009).** `TODO()` deliberately throws so every test
- * in `BalanceCalculationTest` fails at runtime until a later pass implements the real derivation.
  * This is a human-review lane (ADR-0017) — an error here is silently wrong financial data.
  *
- * Expected behavior for the next pass — for each membership `m` in [members]:
+ * Behavior — for each membership `m` in [members]:
  * ```
  * netBalance(m) = (sum of Expense.amount for expenses in `expenses` where payerMembershipId == m.id)
  *               - (sum of Split.amount for splits in `splits` where membershipId == m.id, across
@@ -33,18 +31,17 @@ package com.afnaihisab.core.domain
  * @param splits every [Split] belonging to an expense in [expenses] (from any member, not just
  *   `members` — callers are expected to pass a consistent, already-filtered-to-this-ledger set).
  * @param settlements every [Settlement] recorded against this ledger.
- *
- * `@Suppress("UnusedParameter")`: unused only because the body is a deliberate red-phase `TODO()`
- * (ADR-0009) — the signature above is the contract the implementing pass is written against.
  */
-@Suppress("UnusedParameter")
 fun calculateBalances(
     members: List<Membership>,
     expenses: List<Expense>,
     splits: List<Split>,
     settlements: List<Settlement>,
 ): List<MemberBalance> =
-    TODO(
-        "AC-6..AC-7 (docs/specs/expense-split-balance.md): balance derivation from " +
-            "expenses/splits/settlements — implemented by a later pass, not this red-phase stub.",
-    )
+    members.map { member ->
+        val paid = expenses.filter { it.payerMembershipId == member.id }.sumOf { it.amount }
+        val owed = splits.filter { it.membershipId == member.id }.sumOf { it.amount }
+        val received = settlements.filter { it.toMembershipId == member.id }.sumOf { it.amount }
+        val paidOut = settlements.filter { it.fromMembershipId == member.id }.sumOf { it.amount }
+        MemberBalance(membershipId = member.id, netBalance = paid - owed - received + paidOut)
+    }

@@ -1,5 +1,6 @@
 package com.afnaihisab.core.domain
 
+import com.afnaihisab.core.validation.ValidationError
 import com.afnaihisab.core.validation.ValidationResult
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -20,11 +21,9 @@ object SettlementValidationCodes {
  * Validates and creates a [Settlement] between two distinct memberships of the same ledger
  * (`docs/specs/expense-split-balance.md` AC-8..AC-10).
  *
- * **Not yet implemented — TDD red phase (ADR-0009).** `TODO()` deliberately throws so every test
- * in `SettlementValidationTest` fails at runtime until a later pass implements the real
- * validation. This is a human-review lane (ADR-0017).
+ * This is a human-review lane (ADR-0017).
  *
- * Expected behavior for the next pass:
+ * Behavior:
  * - AC-8: distinct `fromMembershipId`/`toMembershipId`, `amount > 0` -> `Valid(Settlement(...))`
  *   with all fields carried through verbatim. Callers then fold the result into
  *   [calculateBalances] (AC-6) — this function does not touch balances itself.
@@ -32,7 +31,7 @@ object SettlementValidationCodes {
  *   `code = `[SettlementValidationCodes.SAME_MEMBERSHIP]`, no [Settlement] constructed.
  * - AC-10: `amount <= 0` -> `Invalid`, `field = "amount"`,
  *   `code = `[SettlementValidationCodes.AMOUNT_NOT_POSITIVE]`.
- * - Both AC-9 and AC-10 violating at once may report both errors together.
+ * - Both AC-9 and AC-10 violating at once are reported together.
  *
  * This function intentionally does **not** validate that `fromMembershipId`/`toMembershipId`
  * belong to `ledgerId`'s membership set — that check requires the caller's membership list and is
@@ -42,11 +41,10 @@ object SettlementValidationCodes {
  * @param id the settlement's id — injected (not `Uuid.random()` internally) so tests stay
  *   deterministic (`docs/adr/0009-testing-strategy.md`).
  *
- * `@Suppress`: `UnusedParameter` because the body is a deliberate red-phase `TODO()` (ADR-0009).
- * `LongParameterList` because these are exactly the [Settlement] fields plus an injected `id` for
- * deterministic tests.
+ * `@Suppress("LongParameterList")`: these are exactly the [Settlement] fields plus an injected
+ * `id` for deterministic tests.
  */
-@Suppress("UnusedParameter", "LongParameterList")
+@Suppress("LongParameterList")
 fun createSettlement(
     ledgerId: Uuid,
     fromMembershipId: Uuid,
@@ -56,11 +54,42 @@ fun createSettlement(
     note: String? = null,
     createdAt: Instant,
     id: Uuid = Uuid.random(),
-): ValidationResult<Settlement> =
-    TODO(
-        "AC-8..AC-10 (docs/specs/expense-split-balance.md): settlement validation — " +
-            "implemented by a later pass, not this red-phase stub.",
+): ValidationResult<Settlement> {
+    val errors = mutableListOf<ValidationError>()
+
+    if (fromMembershipId == toMembershipId) {
+        errors +=
+            ValidationError(
+                field = "toMembershipId",
+                code = SettlementValidationCodes.SAME_MEMBERSHIP,
+                message = "fromMembershipId and toMembershipId must be distinct",
+            )
+    }
+
+    if (amount.value <= 0L) {
+        errors +=
+            ValidationError(
+                field = "amount",
+                code = SettlementValidationCodes.AMOUNT_NOT_POSITIVE,
+                message = "amount must be positive",
+            )
+    }
+
+    if (errors.isNotEmpty()) return ValidationResult.Invalid(errors)
+
+    return ValidationResult.Valid(
+        Settlement(
+            id = id,
+            ledgerId = ledgerId,
+            fromMembershipId = fromMembershipId,
+            toMembershipId = toMembershipId,
+            amount = amount,
+            currency = currency,
+            note = note,
+            createdAt = createdAt,
+        ),
     )
+}
 
 /**
  * The result of [recordSettlement]: the [Settlement] itself, plus the two parties' balances
@@ -80,11 +109,9 @@ data class SettlementRecord(
  * [calculateBalances] result immediately before and immediately after it
  * (`docs/specs/expense-split-balance.md` AC-13).
  *
- * **Not yet implemented — TDD red phase (ADR-0009).** `TODO()` deliberately throws so every test
- * in `SettlementRecordTest` fails at runtime until a later pass implements the real composition.
  * This is a human-review lane (ADR-0017).
  *
- * Expected behavior for the next pass:
+ * Behavior:
  * 1. Call [createSettlement] with the settlement fields. If it returns `Invalid`, return that same
  *    `Invalid` unchanged (it is already a `ValidationResult<Nothing>`, so no reconstruction is
  *    needed) — [existingSettlements]/[calculateBalances] are never touched on the rejected path.
@@ -101,12 +128,11 @@ data class SettlementRecord(
  *   [calculateBalances] already expects it — [existingSettlements] excludes the settlement being
  *   recorded by this call.
  *
- * `@Suppress`: `UnusedParameter` because the body is a deliberate red-phase `TODO()` (ADR-0009).
- * `LongParameterList` because AC-13 composes [createSettlement] over [calculateBalances], so this
- * signature is deliberately the union of both — the spec explicitly rejects storing the ledger
- * state on [Settlement] instead.
+ * `@Suppress("LongParameterList")`: AC-13 composes [createSettlement] over [calculateBalances], so
+ * this signature is deliberately the union of both — the spec explicitly rejects storing the
+ * ledger state on [Settlement] instead.
  */
-@Suppress("UnusedParameter", "LongParameterList")
+@Suppress("LongParameterList")
 fun recordSettlement(
     members: List<Membership>,
     expenses: List<Expense>,
@@ -120,8 +146,37 @@ fun recordSettlement(
     note: String? = null,
     createdAt: Instant,
     id: Uuid = Uuid.random(),
-): ValidationResult<SettlementRecord> =
-    TODO(
-        "AC-13 (docs/specs/expense-split-balance.md): settlement + before/after balance " +
-            "composition — implemented by a later pass, not this red-phase stub.",
-    )
+): ValidationResult<SettlementRecord> {
+    val created =
+        createSettlement(
+            ledgerId = ledgerId,
+            fromMembershipId = fromMembershipId,
+            toMembershipId = toMembershipId,
+            amount = amount,
+            currency = currency,
+            note = note,
+            createdAt = createdAt,
+            id = id,
+        )
+
+    return when (created) {
+        is ValidationResult.Invalid -> created
+        is ValidationResult.Valid -> {
+            val settlement = created.value
+            val before = calculateBalances(members, expenses, splits, existingSettlements)
+            val after = calculateBalances(members, expenses, splits, existingSettlements + settlement)
+            val beforeByMembership = before.associateBy { it.membershipId }
+            val afterByMembership = after.associateBy { it.membershipId }
+
+            ValidationResult.Valid(
+                SettlementRecord(
+                    settlement = settlement,
+                    fromBefore = beforeByMembership.getValue(fromMembershipId),
+                    toBefore = beforeByMembership.getValue(toMembershipId),
+                    fromAfter = afterByMembership.getValue(fromMembershipId),
+                    toAfter = afterByMembership.getValue(toMembershipId),
+                ),
+            )
+        }
+    }
+}
