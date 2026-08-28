@@ -52,13 +52,15 @@ Intent (sealed)  ──dispatch──>  reduce(state, intent) ──>  State (im
 - **SQLDelight** (ADR-0006) for the local read-through cache in Phase 3, later the offline write queue in Phase 5. Chosen over Room 3.0 specifically because it writes SQL directly in `commonMain` — the query layer is proven multiplatform by the time Phase 4 (iOS) needs it, rather than inheriting Android-first assumptions.
 - **ktor-client** in `core`'s data package for networking, `MockEngine`-tested (ADR-0009) so networking logic doesn't require a live server to test.
 
-## Auth (ADR-0008)
+## Auth (ADR-0008, ADR-0030)
 
 - Access token ~1h, refresh token ~24h+, single-use with rotation: each refresh burns the old token and issues a new one; reuse of an already-burned token revokes the whole session family (theft detection).
 - Client: Ktor's Bearer Auth `loadTokens`/`refreshTokens` hooks — auto-attach, auto-refresh on 401, retry original request, `Mutex`-guarded against duplicate concurrent refreshes.
 - Server: session/family tracking table, not purely stateless JWT — required for rotation + revocation to work. This is Phase 1/2 backend scope, not deferrable.
 - OAuth (Phase 2) layers on top of this token pattern; it doesn't replace it.
 - On-device storage (Phase 3+, ADR-0011): Android Keystore-backed encrypted storage, iOS Keychain — via an `expect`/`actual` `TokenStore` in `core`. Never plain `SharedPreferences`/`UserDefaults`.
+- **Password hashing (ADR-0030)**: Argon2id via `argon2-jvm`, server-side only — `core` never sees a raw password or its hash. Email verification and password reset are Phase 2 (need real email delivery); a successful reset revokes the user's session family via the same mechanism as a detected refresh-token reuse.
+- **i18n (ADR-0031)**: `web`'s user-facing strings are wrapped via `next-intl` from Phase 1 — architecture only, no translations committed yet. Locale-sensitive formatting (currency, numbers, in addition to ADR-0027's dates) is a client-only concern, same principle as timestamps.
 
 ## Native platform APIs (ADR-0011)
 

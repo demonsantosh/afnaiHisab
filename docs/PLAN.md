@@ -43,6 +43,8 @@
 | ADR-0027 | All timestamps UTC internally (`Instant`); localization is a client-only display concern, never server-side |
 | ADR-0028 | API v1 stays additive-only, forever, once mobile clients exist — a breaking change requires v2, not a v1 mutation |
 | ADR-0029 | Periodic data-integrity reconciliation (split-sums, per-ledger balance-nets-to-zero) — defense in depth independent of `core`'s write-path validation |
+| ADR-0030 | Account lifecycle: Argon2id password hashing, length-based strength policy, non-blocking email verification, time-limited single-use password reset |
+| ADR-0031 | i18n architecture decided now (`next-intl`, every string wrapped from Phase 1) — no translations committed yet, just kept cheap to add later |
 
 System-design review (2026-08-28, two passes): first pass found non-functional requirements, idempotency, authorization, and backup/DR. A deeper second pass found operational limits/timeouts, timezone handling, multi-client API compatibility, and data-integrity reconciliation as defense-in-depth. The append-only/derive-on-read balance design (`docs/PLAN.md` §3) was validated as race-condition-safe by construction, not by locking, in both passes.
 
@@ -98,7 +100,8 @@ afnaihisab/
 
 ### Phase 1 — Web MVP, localhost only ← next
 - Write a `docs/specs/<feature>.md` (ADR-0016) for each bullet below before implementing it — starting with expense/split/balance, since that's the money-math lane ADR-0017 flags for human review
-- Auth: email/password, JWT access + refresh token per ADR-0008 (no OAuth yet)
+- Auth: email/password (Argon2id hashing, ADR-0030), JWT access + refresh token per ADR-0008 (no OAuth, email verification, or password reset yet)
+- Web strings wrapped via `next-intl` from the first component (ADR-0031) — English-only content, architecture only
 - Create Ledger (personal + group), invite members
 - Add Expense with equal split
 - Balance calculation (who owes whom) — algorithm lives entirely in `core`'s domain layer, tested per ADR-0009, using the rounding-remainder rule from `docs/FEATURES.md` §(a)
@@ -112,6 +115,7 @@ afnaihisab/
 - Recurring expenses with explicit edit semantics, recurring-bill detection
 - Multi-currency conversion, receipt attachment with itemized extraction, search/filter, category breakdown, notification granularity, push notifications, CSV export, non-app members
 - OAuth + 2FA layered onto the ADR-0008 token pattern; encryption at rest, TLS, session auto-timeout per ADR-0013
+- Email verification + password reset (ADR-0030) — both need real email delivery, which is why they wait for this phase; profile management (change name/email/password)
 - **Deploy to free staging** — Koyeb (backend) + Neon (Postgres) + Vercel Hobby (web), per ADR-0018 — this is what makes real multi-user testing (not just solo localhost) possible, at $0
 - Real multi-user test on staging: at least two people using a shared ledger concurrently, not just solo testing (ADR-0018 promotion-gate criterion #2)
 - Production deploy target: still deliberately TBD — decided later against ADR-0018's promotion gate, not now

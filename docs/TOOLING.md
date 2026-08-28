@@ -29,6 +29,7 @@ Last verified: 2026-08-27, on this machine (macOS/Darwin, arm64) — updated aft
 | DB (target) | Postgres | ⚠️ needs Docker | Still not installed. Local via Docker; Neon in staging (ADR-0018) |
 | Migrations | Flyway 13.4.0 | ✅ scaffolded | ADR-0019 — plain versioned SQL. `server/src/main/resources/db/migration/V1__init.sql`. H2 support ships inside `flyway-core`; real Postgres will additionally need `flyway-database-postgresql` |
 | Config/secrets | `dotenv-kotlin` 6.5.1 | ✅ scaffolded | Real env vars win over `.env`, so CI and deploys never ship a `.env` (ADR-0015) |
+| Password hashing | `argon2-jvm` | 🔜 Phase 1 | ADR-0030 — Argon2id, OWASP-minimum params (19 MiB / 2 iterations / 1 parallelism). Verify latest version at merge time. |
 | Manual API testing | IntelliJ `.http` files | ✅ started | `server/api.http`, committed alongside the endpoints it tests — ADR-0019 |
 
 ## Web (`web`)
@@ -38,6 +39,7 @@ Last verified: 2026-08-27, on this machine (macOS/Darwin, arm64) — updated aft
 | Runtime | Node.js | ✅ v20.19.2 installed | Node 20 LTS's support window ends ~April 2026 — already past that as of this doc's date; fine for development now, revisit before any production reliance. |
 | Package manager | npm | ✅ 10.8.2 installed | ADR-0019 — no pnpm install needed |
 | Framework | Next.js 16.3.3 + React 19.2.8 | ✅ scaffolded | ADR-0003. App Router, TypeScript, no Tailwind. **Note:** Next 16 ships its own docs in `web/node_modules/next/dist/docs/` and an auto-generated `web/AGENTS.md` warning that APIs differ from older training data — read those before writing web code |
+| i18n | `next-intl` | 🔜 Phase 1 | ADR-0031 — every user-facing string wrapped from day one, English-only content for now |
 | Unit/component tests | Vitest + React Testing Library | 🔜 Phase 1 | ADR-0019 |
 | E2E tests | Playwright | 🔜 Phase 1+ | Also available as an MCP tool in this Claude Code session for manual checks during development — it was used to verify the Phase 0 health-check round-trip |
 | Lint/format | ESLint 9 (flat config) + Prettier 3 | ✅ scaffolded | `eslint-config-prettier` last in the chain so ESLint judges code and Prettier owns layout. `npm run lint`, `npm run format`, `npm run format:check` |

@@ -21,10 +21,23 @@ UUIDv7 for every entity's primary key — time-sortable, which makes it a natura
 |---|---|---|
 | id | UUID (v7) | |
 | email | String | unique among non-ghost users |
-| passwordHash | String? | Phase 1: required for real accounts; null for ghost users (can't log in) |
+| passwordHash | String? | Argon2id (ADR-0030), never a raw password. Phase 1: required for real accounts; null for ghost users (can't log in) |
 | displayName | String | |
 | isGhost | Boolean | default false — non-app member per FEATURES.md §(b); invited by email, no login until they claim the account (Phase 2, out of Phase 1 scope) |
+| emailVerifiedAt | Instant? | Phase 2+ (ADR-0030) — not built in Phase 0/1. Non-blocking: null doesn't prevent app usage, only gates password-reset eligibility |
 | createdAt | Instant | |
+
+**Not added now, deliberately** (ADR-0031): a stored `preferredLocale` — Phase 1 is web-only, where browser locale detection is sufficient; worth adding once multiple clients (Phase 3+) need a consistent per-user locale.
+
+### PasswordResetToken (Phase 2+, ADR-0030 — not built in Phase 0/1, shape documented now)
+| Field | Type | Notes |
+|---|---|---|
+| token | UUID | single-use, primary key |
+| userId | UUID | |
+| expiresAt | Instant | 1 hour from creation (ADR-0030) |
+| usedAt | Instant? | null until consumed; a used or expired token is rejected |
+
+**Invariant:** using a valid token must, in the same transaction, revoke the user's existing session family (ADR-0008) — a password reset is exactly the scenario that revocation mechanism exists for.
 
 ### Ledger
 | Field | Type | Notes |

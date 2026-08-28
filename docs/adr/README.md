@@ -33,6 +33,8 @@ The single source of truth for "how many ADRs / what are they" — nothing else 
 | [0027: All timestamps UTC internally](0027-timezone-and-date-handling.md) | Accepted |
 | [0028: API backward compatibility — v1 stays additive-only](0028-api-backward-compatibility.md) | Accepted |
 | [0029: Periodic data-integrity reconciliation](0029-data-integrity-reconciliation.md) | Accepted |
+| [0030: Account lifecycle — password hashing, verification, reset](0030-account-lifecycle.md) | Accepted |
+| [0031: i18n architecture decided now, translations later](0031-internationalization.md) | Accepted |
 
 ## Human-review-required lanes (canonical list — ADR-0017, amended by ADR-0023, ADR-0024)
 

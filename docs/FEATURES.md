@@ -4,7 +4,7 @@ Derived from two research passes: (1) Splitwise's feature set (free + Pro), comp
 
 ## (a) Phase 1 — MVP, localhost web
 
-- **Auth** (email/password) — gate to any ledger data
+- **Auth**: registration + login (email/password, Argon2id hashing per ADR-0030, length-based strength policy, no complexity theater) — gate to any ledger data. No email verification or password reset yet — both need real email delivery, Phase 2 (ADR-0030).
 - **Create Ledger**, personal (1 member) or group (N members) — single entity per ADR-0004, not a fork
 - **Invite/add members by email** — matches Splitwise's core group flow
 - **Add Expense**: amount, payer, date, category, note — minimum viable record
@@ -54,6 +54,14 @@ Phase 1 is deliberately **append-only** — no edit/delete on expenses or settle
 - **Encryption at rest** (AES-256) + **TLS in transit** — explicit deploy-checklist items from Phase 2's deploy step onward
 - **Session auto-timeout/re-lock** (web + mobile)
 - **Biometric app-lock** (mobile, Phase 3/4) — separate from account login, gates the already-secured token store (ADR-0011)
+
+**Account lifecycle** (ADR-0030)
+- **Email verification** — non-blocking, unlocks password-reset eligibility rather than gating basic usage
+- **Password reset** — time-limited (1h), single-use emailed token; using it revokes all existing sessions (ADR-0008)
+- **Profile management** (change display name, email, password) — not yet speced in detail, flagged so it isn't discovered missing mid-Phase-2
+
+**Internationalization** (ADR-0031 — architecture only; no translations committed yet)
+- **i18n-ready UI** (`next-intl`, every string wrapped from Phase 1) — English-only content for now, but retrofitting cost is kept low deliberately
 
 **Sync**
 - **Offline mode with sync** — the feature; the sync-protocol design itself is deferred to Phase 5 per ADR-0002
