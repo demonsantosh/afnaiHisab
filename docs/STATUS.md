@@ -12,7 +12,7 @@ Last updated: 2026-08-28
 - `phase-1/expense-split-balance-impl` — current working branch: TDD red-phase suite, the post-audit fixes (below), and this session's expert-guidelines addition.
 
 ## Planning docs (stable, not being actively revised)
-`PLAN.md` (roadmap), `FEATURES.md` (scope), `ARCHITECTURE.md` (technical design), `TOOLING.md` (tool inventory + the corporate-TLS-proxy fix), `domain-model.md` (entity fields/invariants), `WORKFLOW.md` (agent delegation rules), `AGENTS.md` (repo-root cross-tool contract), 19 ADRs, and now `EXPERT_GUIDELINES.md` (this session — see below). Read these once; they don't change per session the way this file does.
+`PLAN.md` (roadmap), `FEATURES.md` (scope), `ARCHITECTURE.md` (technical design), `TOOLING.md` (tool inventory + the corporate-TLS-proxy fix), `domain-model.md` (entity fields/invariants), `WORKFLOW.md` (agent delegation rules + token-optimization policy), `AGENTS.md` (repo-root cross-tool contract), `EXPERT_GUIDELINES.md` + `docs/guidelines/*.md` (tool-specific coding standards), 20 ADRs, `.claude/agents/{afnaihisab-backend,afnaihisab-web}.md` (project-scoped delegation agents), `.claude/skills/{kotlin,web}-expert-review/` (project-scoped review gates). Read these once; they don't change per session the way this file does.
 
 ## Done this session (2026-08-28)
 - **Phase 0 scaffolding reviewed, committed to a feature branch (not `main`), pushed.** GitHub remote created and connected.

@@ -15,15 +15,15 @@ Do not re-scan the whole repo to "get oriented" — STATUS.md exists so that's u
 
 | Task shape | Use | Why |
 |---|---|---|
-| Multi-file feature implementation within a phase | `smh:executor` (or `smh:executor-high` if it spans backend+shared+web) | Keeps the main thread from holding every file's full contents; it returns a summary + diff |
-| Single-file trivial edit (typo, one function, config tweak) | `smh:executor-low` | Cheapest tier, no need for a bigger model on mechanical work |
+| `core`/`server` implementation (any size) | `afnaihisab-backend` (`.claude/agents/`) | Project-scoped agent, pre-loaded with module boundaries, JDK path, TDD discipline, and which guideline docs to read — the delegation prompt only needs to state the task, not re-brief the whole project every time (this is what `smh:executor`/`smh:executor-high` required, at real token cost, before this agent existed) |
+| `web/` implementation (any size) | `afnaihisab-web` (`.claude/agents/`) | Same idea, pre-loaded with ADR-0020's client-side-fetch constraint and the Next.js/React guidelines |
+| Single-file trivial edit (typo, one-line config tweak) | Do it inline | Delegation itself isn't free — an agent call for a two-line change costs more than it saves |
 | Compile/type errors after a change | `smh:build-fixer` | Iterating on build errors directly in the main thread burns tokens on repeated error output; this agent loops until green and reports back |
-| New domain logic (split math, balance calc, debt simplification) | `smh:tdd-guide` first, then `smh:executor` | This is the highest-leverage, highest-risk code in the whole project (per ADR-0001) — write tests first, deliberately, not as an afterthought |
 | "Where is X / which files reference Y" | `Explore` | Read-only, fast, doesn't burn a full agent's context budget on a search |
-| After finishing a feature slice, before moving to the next | `smh:code-reviewer` (or `-low` for a small diff) | Catches issues while the diff is small and cheap to review, not after three more features stack on top |
-| Genuinely ambiguous multi-step research (like this planning phase) | `Agent` with `subagent_type: "fork"` in parallel | Keeps raw search/tool output out of the main thread; only the synthesis lands here |
+| After finishing a feature slice, before moving to the next | `/kotlin-expert-review` or `/web-expert-review` | Project-specific gates (see below) — catches issues while the diff is small, not after three more features stack on top |
+| Genuinely ambiguous multi-step research | `Agent` with `subagent_type: "fork"` in parallel | Keeps raw search/tool output out of the main thread; only the synthesis lands here |
 
-Default posture: **the main thread plans and reviews summaries; subagents touch files and run commands.** If a task is small enough to just do inline (one Edit call), do it inline — delegation itself isn't free, don't use an agent for a two-line change.
+Default posture: **the main thread plans and reviews summaries; subagents touch files and run commands.** `smh:executor`/`smh:executor-high`/`smh:tdd-guide` still exist as fallbacks if a task doesn't fit either project agent's scope, but for anything in `core`/`server`/`web/`, the project-scoped agents are cheaper and more consistent by default.
 
 ## Human-review-required lanes (ADR-0017)
 
@@ -43,8 +43,19 @@ Everything else follows the delegation table above without extra ceremony.
 - `/web-expert-review` — the `web/` sibling (`docs/guidelines/nextjs-react-typescript.md`) — run before merging any `web/` change, especially anything touching how it calls the backend (ADR-0020).
 - `/security-review` — run once before Phase 2 deploy (auth, input handling, SQL/XSS) and again before any Phase 6 accounting data goes live.
 
-## Project-root CLAUDE.md (to create once code exists)
-Once `core/`, `server/`, `web/` are scaffolded (Phase 0), add a project-level `CLAUDE.md` documenting: module boundaries (link to ADR-0001), naming/package conventions, how to run the dev stack locally, and where tests live. This is what stops every future session from re-deriving repo conventions from scratch — the single highest-leverage token-saver for a long-lived project.
+## Token optimization policy
+
+Three persistence mechanisms exist for this project, each with a different cost profile — using the wrong one for a given fact wastes tokens every future session, not just this one.
+
+| Mechanism | Cost profile | What belongs here |
+|---|---|---|
+| Repo docs (`docs/*.md`, `AGENTS.md`, ADRs) | Zero standing cost — paid only when a session actually reads the file | All project state and decisions. Visible to *any* tool (Codex, Cursor, Copilot, Claude Code) per `AGENTS.md`'s whole design, not just this session. |
+| Claude memory (`~/.claude/projects/.../memory/`) | Small standing cost (loaded into context automatically); invisible to any other tool or human reading this repo | Only facts about *the user* or *how to collaborate with them* that generalize beyond this one repo (e.g. "prefers plain questions over structured UI," "wants fresh research before technical decisions"). Never project state — `docs/STATUS.md` already serves that role, and duplicating it into memory creates two sources of truth that can silently drift. |
+| Claude Code Skills (`.claude/skills/*/SKILL.md`) | The `name`+`description` is loaded into **every single turn of every session**, forever, regardless of whether it's invoked — the body is paid only on invocation | Keep the *count* of skills small (each one adds to that per-turn tax) and each `description` a single dense sentence — full detail belongs in the body (paid once, on invocation) or in a referenced doc, not in the always-loaded description. Don't fragment one review skill into several narrower ones; add depth via referenced docs (`docs/guidelines/*.md`) instead. |
+| Custom Agents (`.claude/agents/*.md`) | No standing per-turn cost — the whole file's content is paid only when that agent is actually invoked | The right place for project context that's currently re-typed into every delegation prompt (module boundaries, JDK path, which docs to read, process discipline). `afnaihisab-backend`/`afnaihisab-web` exist specifically so delegation prompts can shrink to "do X," not "do X, and also here's the whole project." |
+
+## Project-root CLAUDE.md
+Created during Phase 0 scaffolding — module boundaries (ADR-0001), naming/package conventions, dev-stack commands, where tests live. Keep it current as conventions evolve; this is what stops every future session from re-deriving repo conventions from scratch.
 
 ## What NOT to do
 - Don't ask a fresh (non-fork) agent to "continue the plan" — it has no context and will re-derive everything already decided here, burning tokens re-solving solved problems.

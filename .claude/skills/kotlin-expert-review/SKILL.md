@@ -1,6 +1,6 @@
 ---
 name: kotlin-expert-review
-description: Review Kotlin/KMP code changes in AfnaiHisab against this project's own expert-level guidelines (docs/EXPERT_GUIDELINES.md, plus docs/guidelines/exposed-koin.md for repository-layer code) — Kotlin idioms, domain-layer purity, TDD/testing discipline, Ktor/Exposed/Koin conventions, build hygiene, and money-math correctness. A stricter, project-specific sibling to the generic /code-review, informed by this project's own audits (ADR-0005/0009/0015/0017/0019/0020) rather than generic advice. Use before merging any core/server change, and always for anything in ADR-0017's human-review lanes (money math, auth, deletion, audit log). For web/ (Next.js/React/TypeScript) changes, use web-expert-review instead.
+description: AfnaiHisab-specific, stricter review of core/server Kotlin/KMP changes against docs/EXPERT_GUIDELINES.md + docs/guidelines/exposed-koin.md. Required before merging core/server work, always for ADR-0017 human-review lanes (money math, auth, deletion, audit log). Use web-expert-review for web/ instead.
 ---
 
 # Kotlin Expert Review

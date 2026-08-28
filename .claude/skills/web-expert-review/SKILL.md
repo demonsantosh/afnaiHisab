@@ -1,6 +1,6 @@
 ---
 name: web-expert-review
-description: Review Next.js/React/TypeScript changes in AfnaiHisab's web/ against this project's researched, current (2026) guidelines (docs/guidelines/nextjs-react-typescript.md) — Server/Client Component boundaries, the ADR-0020 client-side-fetch-not-Server-Actions decision, form/useActionState conventions, TypeScript discriminated unions matching the backend's error envelope, and folder structure. The web-stack sibling to kotlin-expert-review; use before merging any web/ change.
+description: AfnaiHisab-specific review of web/ Next.js/React/TypeScript changes against docs/guidelines/nextjs-react-typescript.md + ADR-0020 (client-side fetch, not Server Actions). Required before merging any web/ change. Use kotlin-expert-review for core/server instead.
 ---
 
 # Web Expert Review
