@@ -8,6 +8,7 @@ AfnaiHisab — Splitwise-style expense splitter evolving into a multipurpose acc
 - `docs/adr/` — one file per architectural/process decision, with rationale (read before contradicting one)
 - `docs/FEATURES.md` — scoped feature list per phase
 - `docs/specs/<feature>.md` — per-feature acceptance criteria (ADR-0016), write one before implementing a feature
+- `docs/EXPERT_GUIDELINES.md` — this project's own distilled expert-level standard (Kotlin idioms, domain-layer purity, testing discipline, Ktor conventions, build hygiene, money-math correctness), earned from a real best-practice audit — read before writing `core`/`server` code, not just before reviewing it. Enforced by the `kotlin-expert-review` skill.
 
 ## Module boundaries (ADR-0001) — do not violate
 - `core/` — domain logic, data layer, validation, MVI presentation state. Framework-agnostic. This is the load-bearing module: business logic here is shared by server + Android + iOS.

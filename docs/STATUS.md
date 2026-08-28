@@ -1,41 +1,44 @@
 # Project status — AfnaiHisab
 
-Last updated: 2026-08-27
+Last updated: 2026-08-28
 
 ## Current phase
-**Phase 0 — Foundations. Scaffolding complete 2026-08-27, uncommitted and pending review.** Git repo initialized (local identity: `get.santoshbhandari@gmail.com` / `Santosh`, distinct from global config). Every `docs/PLAN.md` §5 Phase 0 "done when" criterion is met locally: `./gradlew build` is green, both dev servers run, and the health check round-trips from the browser through the CORS allow-list to H2 and back. Two items cannot be finished from this machine and remain open: no GitHub remote exists, so ADR-0017's merge-blocking branch protection is unconfigured; and Docker/Postgres is still not installed (H2 is carrying local dev, as `docs/TOOLING.md` allows).
+**Phase 1 — Web MVP, TDD red phase.** Phase 0 (scaffolding) is committed, pushed, and its PR is open. Phase 1's first feature (expense/split/balance/settlement) has a written spec, a full red-phase test suite (15 tests, all failing on `NotImplementedError` only — nothing implemented yet), and has already been through one full best-practice audit with real fixes applied. Next real step is the green phase: implementing the logic behind those 15 tests.
 
-## Done
-- Vision, locked architectural decisions, domain model v1, repo layout, and full phased roadmap written (`docs/PLAN.md`)
-- Feature requirements researched and tiered (`docs/FEATURES.md`) — Splitwise/competitor feature research + accounting-app standard features
-- Technical architecture researched and consolidated (`docs/ARCHITECTURE.md`) — module structure, DI, data layer, settle-up algorithm, auth, testing strategy
-- ADR-0001 through ADR-0014 recorded (`docs/adr/`), including ADR-0001's 2026-08-27 module-naming amendment (`shared/` → `core`, `backend/` → `server`), ADR-0010 (MVI presentation layer), ADR-0011 (secure storage + push notifications via expect/actual), ADR-0012 (audit log), ADR-0013 (security hardening baseline), ADR-0014 (anonymize vs hard-delete for GDPR)
-- Plan cross-checked against the official Kotlin Multiplatform cross-platform-mobile-development doc's full 10-point benefit list — 8/10 already covered, 2 gaps closed (native-API expect/actual boundary, platform look-and-feel flagged for explicit Phase 4 decision)
-- `docs/FEATURES.md` deepened via two further research passes: (1) advanced/edge-case splitting mechanics + 2025-2026 AI-era fintech UX, (2) accounting depth (envelope budgeting, reconciliation, net worth, OFX) + finance-app security/compliance baseline. Phase 1 gained one explicit correctness rule (rounding-remainder allocation); Phase 2 absorbed most fold-ins (audit log, roles, partial settlements, 2FA, encryption at rest, etc.) since Phase 1 is append-only and has nothing yet to audit or harden beyond auth itself.
-- Working process / delegation rules defined (`docs/WORKFLOW.md`)
-- Full doc review completed 2026-08-27: fixed stale `shared/`/`backend/` references left over from ADR-0001's rename (in ADR-0002/0003/0004, ARCHITECTURE.md, WORKFLOW.md), reconciled split-type and role terminology drift between `PLAN.md`/`FEATURES.md`/`ARCHITECTURE.md`, and closed an operational-conventions gap (API versioning, pagination, error format, CORS, secrets, rate limiting) via new ADR-0015
-- Researched how disciplined AI-assisted ("vibe coding") development stays maintainable/handoff-ready: adopted `AGENTS.md` (cross-tool root-level standard, distinct from the Claude-specific `WORKFLOW.md`), spec-driven development for individual features (ADR-0016, `docs/specs/TEMPLATE.md`, EARS-format acceptance criteria before implementation), and development workflow conventions — enforced CI test gate, git/commit hygiene, dependency pinning, named human-review-required lanes (ADR-0017)
-- Researched and locked a free staging environment for multi-user/mobile testing before production: Koyeb (backend) + Neon (Postgres) + Vercel Hobby (web), $0 cost, with an explicit promotion-to-production gate (ADR-0018). Phase 2/3/4 in `docs/PLAN.md` updated so mobile debug builds test against staging directly once it exists.
-- Full development/testing tooling inventoried and decided (ADR-0019, `docs/TOOLING.md`): JDK 17, Flyway, ktlint, npm, Vitest+RTL+Playwright, Swift Package Manager, GitHub+Actions. Local machine checked 2026-08-27 — JDK 17/Node 20/Android SDK/Xcode 26.6/git already installed; **Docker and a git repository are not** — both are now explicit Phase 0 prerequisites.
-- **Corporate TLS proxy diagnosed and fixed** — the first scaffolding attempt stalled because no JDK's `cacerts` trusted the network's intercepting CA, breaking every Gradle dependency resolution with `PKIX path building failed`. Root cause, the `keytool` fix, and the resulting switch to Homebrew `openjdk@17` are written up in `docs/TOOLING.md` and ADR-0019's amendment.
-- **Phase 0 scaffolding built (2026-08-27, uncommitted):**
-  - Root Gradle build, `gradle/libs.versions.toml` (all versions pinned, ADR-0017), Gradle 9.3 wrapper.
-  - `core` — every `docs/domain-model.md` entity as a Kotlin type (money as `MinorUnits`, a `@JvmInline value class` over `Long`; currency as `CurrencyCode` over `String`), plus `presentation/Mvi.kt` (ADR-0010), `validation/ValidationResult.kt`, `data/api/{CursorPage,ApiError}.kt` (ADR-0015).
-  - `server` — Ktor + Netty, `/api/v1/health` reporting service/version/database, Koin DI (ADR-0005), Exposed over a Hikari pool, Flyway `V1__init.sql` covering users/ledgers/memberships/expenses/splits/settlements (no audit log — Phase 2, ADR-0012), H2 in PostgreSQL compatibility mode, CORS allow-list, ADR-0015's error envelope via status-pages, `.env` loading, `server/api.http` for IntelliJ (ADR-0019). 7 integration tests via `ktor-server-test-host`.
-  - `web` — Next.js 16 + React 19 + TypeScript, one page whose **client-side** fetch of `/api/v1/health` is what actually exercises CORS, ESLint + Prettier, exact-pinned dependencies with `package-lock.json` committed.
-  - `.github/workflows/ci.yml` — `./gradlew build` (compile + ktlint + tests) and web lint/format/build, both failing the run on error (ADR-0017).
-  - Root `CLAUDE.md` (module boundaries, conventions, dev-stack commands, where tests live) and `.gitignore`.
-  - ktlint wired into `check` for both `core` and `server`, whole tree clean.
+## Repo / branches
+- Remote: https://github.com/demonsantosh/afnaiHisab — `main` and three feature branches pushed, no branch merged yet.
+- `phase-0/kmp-monorepo-scaffold` — Phase 0 scaffolding. PR open: https://github.com/demonsantosh/afnaiHisab/pull/new/phase-0/kmp-monorepo-scaffold (not yet merged; branch protection on `main` not yet configured — both manual GitHub steps).
+- `phase-1/expense-split-balance-spec` — the spec doc, branched off phase-0.
+- `phase-1/expense-split-balance-impl` — current working branch: TDD red-phase suite, the post-audit fixes (below), and this session's expert-guidelines addition.
 
-## In progress
-GitHub remote is live: https://github.com/demonsantosh/afnaiHisab. Both `main` and `phase-0/kmp-monorepo-scaffold` pushed. PR not opened yet, branch protection not configured — both are manual/web-UI steps, not something done from here.
+## Planning docs (stable, not being actively revised)
+`PLAN.md` (roadmap), `FEATURES.md` (scope), `ARCHITECTURE.md` (technical design), `TOOLING.md` (tool inventory + the corporate-TLS-proxy fix), `domain-model.md` (entity fields/invariants), `WORKFLOW.md` (agent delegation rules), `AGENTS.md` (repo-root cross-tool contract), 19 ADRs, and now `EXPERT_GUIDELINES.md` (this session — see below). Read these once; they don't change per session the way this file does.
+
+## Done this session (2026-08-28)
+- **Phase 0 scaffolding reviewed, committed to a feature branch (not `main`), pushed.** GitHub remote created and connected.
+- **Phase 1 spec written** (`docs/specs/expense-split-balance.md`, ADR-0016) — 12 ACs, later extended to 13 (AC-13: every settlement reports balance-before/after context, added per explicit user requirement that settlements must never be ambiguous about what was settled).
+- **TDD red phase complete**: 15 tests across 5 files (`ExpenseSplittingTest`, `BalanceCalculationTest`, `SettlementValidationTest`, `SettlementRecordTest`, `LedgerMembershipTest`) + deterministic `TestFixtures.kt`, all failing on `NotImplementedError` against fully-KDoc'd `TODO()` stubs (`ExpenseFactory.kt`, `BalanceCalculator.kt`, `SettlementFactory.kt`, `LedgerFactory.kt`). Nothing implemented yet — by design.
+- **Full adversarial best-practice audit** (3 parallel research passes against the actual code, not just theory) and every real finding fixed:
+  - `MinorUnits`/`CurrencyCode` converted from bare typealiases to `@JvmInline value class`es — compiler now catches money/currency type mix-ups at zero runtime cost.
+  - `detekt` added alongside `ktlint`, wired into `check`/CI.
+  - 3 missing FK indexes added (`V2__add_missing_fk_indexes.sql` — never edit an applied migration).
+  - Gradle configuration cache enabled (caught and fixed two real incompatibilities immediately).
+  - CORS `maxAge`, `renovate.json`, two ADR amendments (0005, 0015) recording alternatives considered and rejected, `kotlin.uuid.Uuid`'s experimental-API status documented as a monitored risk.
+  - A corporate TLS-intercepting proxy stalled two separate background builds via two *different* unpatched JDKs; fixed by patching every JDK discoverable on this machine, not just the two designated for project use (`TOOLING.md`).
+- **`docs/EXPERT_GUIDELINES.md` written** — this project's own distilled expert-level standard (7 sections: Kotlin idioms, domain-layer purity, testing discipline, Ktor conventions, build/tooling hygiene, money-math correctness, git/process), synthesized from the audit above plus standard practice.
+- **`kotlin-expert-review` Claude Code skill added** (`.claude/skills/kotlin-expert-review/SKILL.md`) — a project-specific, stricter sibling to generic `/code-review`, enforcing `EXPERT_GUIDELINES.md`. Wired into `AGENTS.md` and `WORKFLOW.md`.
+
+## Verified (all green, re-run after every change above)
+`./gradlew ktlintCheck detekt --no-daemon` clean · `./gradlew :core:jvmTest` 15/15 red on `NotImplementedError` only · `./gradlew :server:test` 8/8 green · configuration cache stores/reuses cleanly.
 
 ## Not started
-- Phase 1 application code — auth, ledgers, expenses, splits, settlements, balances (`docs/PLAN.md` §5)
-- `core/src/commonTest` — no domain tests yet, because Phase 0 added types only, no logic
+- Green-phase implementation (the actual logic behind the 15 red tests) — explicitly the next step, not started.
+- CI has never run for real (no PR merged yet, branch protection not configured).
+- Docker/Postgres still not installed — H2 carries local dev, as planned.
+- `Ledger.defaultCurrency`'s real default value — still an open, unresolved question.
 
 ## Next concrete step
-Open the PR (https://github.com/demonsantosh/afnaiHisab/pull/new/phase-0/kmp-monorepo-scaffold), let CI actually run for the first time, then in GitHub Settings → Branches add a protection rule on `main` requiring the CI jobs to pass before merge — this is what turns ADR-0017's test gate from a workflow file into an enforced one. After that, Phase 1 begins with a `docs/specs/<feature>.md` for expense/split/balance (ADR-0016) — the money-math lane ADR-0017 flags for human review — before any implementation.
+Implement the green phase against `docs/specs/expense-split-balance.md`'s 13 ACs, using TDD discipline (ADR-0009) and running `/kotlin-expert-review` before considering it done — this is squarely ADR-0017's money-math human-review lane. Separately, and not blocking: open/merge the Phase 0 PR and configure branch protection on GitHub.
 
 ## Update discipline
-Update this file at the end of every work session — phase changes, milestones hit, or scope changes. This file (not git log or memory) is the source of truth for "where are we."
+Update this file at the end of every work session — phase changes, milestones hit, or scope changes. Prefer rewriting stale sections over appending to them; this file has already needed one full consolidation (2026-08-28) after accumulating too much session-by-session narrative. This file (not git log or memory) is the source of truth for "where are we."

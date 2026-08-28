@@ -27,7 +27,7 @@ Default posture: **the main thread plans and reviews summaries; subagents touch 
 
 ## Human-review-required lanes (ADR-0017)
 
-Regardless of which agent generated the diff, changes touching these areas get flagged explicitly during `smh:code-reviewer` and are never auto-approved on an agent's say-so alone:
+Regardless of which agent generated the diff, changes touching these areas get flagged explicitly during `smh:code-reviewer` / `/kotlin-expert-review` and are never auto-approved on an agent's say-so alone:
 - Auth/token handling (ADR-0008, ADR-0011, ADR-0013)
 - Balance/settle-up money math (ADR-0007) — silently wrong financial data is the worst failure mode this app has
 - Deletion/anonymization logic (ADR-0014)
@@ -38,7 +38,8 @@ Everything else follows the delegation table above without extra ceremony.
 ## Skills already available and when they apply
 - `/sc:implement`, `/sc:build`, `/sc:test`, `/sc:troubleshoot` — SuperClaude command set already configured; use over ad-hoc prompting for their named purpose (implementation, build, test, debug) since they carry their own workflow discipline.
 - `/sc:design` — for any API or schema design pass before implementation (e.g., before Phase 1's Expense/Split endpoints).
-- `/code-review` — run at `high` effort at the end of each phase (not every commit) as a bulk correctness/simplification pass; `low`/`medium` effort for smaller mid-phase diffs.
+- `/code-review` — generic correctness/simplification pass; run at `high` effort at the end of each phase, `low`/`medium` for smaller mid-phase diffs.
+- `/kotlin-expert-review` — this project's own, stricter, project-specific gate (`docs/EXPERT_GUIDELINES.md`) — run this, not (or in addition to) generic `/code-review`, before merging any `core`/`server` change, and always for an ADR-0017 human-review-lane diff (money math, auth, deletion, audit log).
 - `/security-review` — run once before Phase 2 deploy (auth, input handling, SQL/XSS) and again before any Phase 6 accounting data goes live.
 
 ## Project-root CLAUDE.md (to create once code exists)

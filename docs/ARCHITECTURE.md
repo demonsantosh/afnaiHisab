@@ -1,6 +1,6 @@
 # Architecture — AfnaiHisab
 
-Technical reference consolidating ADR-0001 through ADR-0019. Read `docs/PLAN.md` for phases/roadmap, `docs/FEATURES.md` for scope, `AGENTS.md` for the repo-root agent contract, and `docs/TOOLING.md` for the concrete tool inventory; this doc is "how it's actually built."
+Technical reference consolidating ADR-0001 through ADR-0019. Read `docs/PLAN.md` for phases/roadmap, `docs/FEATURES.md` for scope, `AGENTS.md` for the repo-root agent contract, `docs/TOOLING.md` for the concrete tool inventory, and `docs/EXPERT_GUIDELINES.md` for the coding standard itself (enforced by the `kotlin-expert-review` skill); this doc is "how it's actually built."
 
 ## Module layout (ADR-0001, amended)
 
