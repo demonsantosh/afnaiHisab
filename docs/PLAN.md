@@ -34,7 +34,7 @@
 | ADR-0018 | Free staging environment (Koyeb + Neon + Vercel Hobby) for multi-user/mobile testing before production, with an explicit promotion gate |
 | ADR-0019 | Tooling: JDK 17, Flyway migrations, ktlint, npm, Vitest+RTL+Playwright, Swift Package Manager, GitHub + GitHub Actions |
 | ADR-0020 | Web stays on client-side `lib/api.ts` for reads and writes (no Server Actions calling Ktor) — `useActionState` for form UX only |
-| ADR-0021 | Every platform's UI is declarative (React, Compose Multiplatform UI, SwiftUI or Compose Multiplatform UI) — Android's choice is explicitly Compose Multiplatform UI, not Android-only Jetpack Compose |
+| ADR-0021 | Every platform's UI is declarative (React on web, Compose Multiplatform UI on mobile) — Android's choice is explicitly Compose Multiplatform UI, not Android-only Jetpack Compose (iOS's own choice: see ADR-0032) |
 | ADR-0022 | Non-functional requirements stated explicitly: small-scale, best-effort availability, strong consistency within a ledger, interactive-latency only |
 | ADR-0023 | Idempotency keys required on mutating financial endpoints — a retried request never creates a duplicate expense/settlement |
 | ADR-0024 | Ledger-membership authorization is an explicit, enforced, human-review-required rule on every ledger-scoped route |
@@ -46,6 +46,9 @@
 | ADR-0030 | Account lifecycle: Argon2id password hashing, length-based strength policy, non-blocking email verification, time-limited single-use password reset |
 | ADR-0031 | i18n architecture decided now (`next-intl`, every string wrapped from Phase 1) — no translations committed yet, just kept cheap to add later |
 | ADR-0032 | iOS uses Compose Multiplatform UI (decided early, not deferred to Phase 4) — same framework as Android; HIG-fidelity and accessibility are explicit, owned design work, not automatic |
+| ADR-0033 | Navigation: `androidx.navigation` (Navigation Compose Multiplatform), official/stable since CMP 1.10.0 — not Decompose (framework commitment ADR-0010 already rejected) or Voyager |
+| ADR-0034 | Mobile i18n: `compose.resources` — the Android/iOS counterpart to ADR-0031's web-only `next-intl` |
+| ADR-0035 | MVI containers extend `androidx.lifecycle.ViewModel`/`viewModelScope` — refines ADR-0010, doesn't replace it; also resolves the general "Lifecycle" question |
 
 System-design review (2026-08-28, two passes): first pass found non-functional requirements, idempotency, authorization, and backup/DR. A deeper second pass found operational limits/timeouts, timezone handling, multi-client API compatibility, and data-integrity reconciliation as defense-in-depth. The append-only/derive-on-read balance design (`docs/PLAN.md` §3) was validated as race-condition-safe by construction, not by locking, in both passes.
 
@@ -129,6 +132,7 @@ afnaihisab/
 - `core`'s data layer becomes real multiplatform (expect/actual, ktor-client networking, MockEngine-tested per ADR-0009)
 - `app/androidApp` consumes `core` directly — no HTTP-boundary reimplementation
 - UI is Compose Multiplatform UI (ADR-0021), not plain Android-only Jetpack Compose — get the Gradle setup right at this phase's start, not mid-implementation
+- MVI containers extend `androidx.lifecycle.ViewModel` (ADR-0035); `androidx.navigation` for routing (ADR-0033); `compose.resources` wired for strings from the start (ADR-0034)
 - Local read-through cache via SQLDelight per ADR-0006, server still authoritative per ADR-0002
 - Secure token storage (Keystore) + push notifications (FCM) per ADR-0011; biometric app-lock + session timeout per ADR-0013
 - Debug builds point at the Phase 2 staging URL directly (Koyeb, already public per ADR-0018) — no tunnel needed since staging exists by this point in the roadmap. Emulator (`10.0.2.2`) or LAN IP only needed for iterating against a local `server` before pushing to staging.

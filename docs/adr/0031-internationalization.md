@@ -1,7 +1,7 @@
-# ADR-0031: i18n architecture decided now; translations added later
+# ADR-0031: i18n architecture decided now; translations added later (web)
 
 ## Status
-Accepted
+Accepted. Scope note added 2026-08-28: this ADR is `web`-only, as it always was — see ADR-0034 for the mobile (Android/iOS) equivalent, `compose.resources`.
 
 ## Context
 Nothing in this project has addressed multi-language UI support, despite the app potentially serving a geographically/linguistically diverse user base (clarified as distinct from ADR-0022's small-scale *user-count* NFR — a dozen users scattered across countries is still "small-scale," but needs localization ADR-0022 never addressed). The costly part of internationalization isn't the library setup — it's retrofitting every hardcoded UI string into a translation-key system after the fact, touching every component that was written without it in mind. Deciding the *pattern* now, even with zero translations yet, is the same "cheap now, expensive later" reasoning already used for ADR-0027 (timezones).

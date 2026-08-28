@@ -13,7 +13,7 @@ The single source of truth for "how many ADRs / what are they" — nothing else 
 | [0007: Greedy heap-based debt simplification](0007-settle-up-algorithm.md) | Accepted |
 | [0008: Short-lived JWT access token + rotating refresh token](0008-jwt-auth-refresh-rotation.md) | Accepted |
 | [0009: kotlin.test in commonTest as the primary test surface](0009-testing-strategy.md) | Accepted |
-| [0010: Lightweight, hand-rolled MVI for the shared presentation layer](0010-mvi-presentation-layer.md) | Accepted, amended 2026-08-28 (stale cross-reference to ADR-0032 fixed) |
+| [0010: Lightweight, hand-rolled MVI for the shared presentation layer](0010-mvi-presentation-layer.md) | Accepted, amended 2026-08-28 twice (ADR-0032 cross-reference; ADR-0035 resolved the ViewModel-base-class ambiguity) |
 | [0011: Platform-specific APIs via expect/actual](0011-platform-specific-apis.md) | Accepted |
 | [0012: Visible audit log for shared-ledger mutations](0012-audit-log-for-mutations.md) | Accepted, starts Phase 2. Amended 2026-08-28 (scope widened to Membership) |
 | [0013: Security hardening baseline](0013-security-hardening-baseline.md) | Accepted |
@@ -24,7 +24,7 @@ The single source of truth for "how many ADRs / what are they" — nothing else 
 | [0018: Free staging environment before production](0018-staging-environment.md) | Accepted |
 | [0019: Development tooling choices](0019-development-tooling-choices.md) | Accepted, amended 2026-08-27 (JDK pick) |
 | [0020: Web stays on client-side lib/api.ts, not Server Actions](0020-web-client-side-fetch-not-server-actions.md) | Accepted |
-| [0021: Declarative UI on every platform](0021-declarative-ui-across-platforms.md) | Accepted |
+| [0021: Declarative UI on every platform](0021-declarative-ui-across-platforms.md) | Accepted, amended 2026-08-28 (iOS's "stays undecided" framing superseded by ADR-0032) |
 | [0022: Non-functional requirements, stated explicitly](0022-non-functional-requirements.md) | Accepted |
 | [0023: Idempotency keys for mutating financial endpoints](0023-idempotency-for-mutating-endpoints.md) | Accepted |
 | [0024: Ledger membership authorization as an explicit, enforced rule](0024-ledger-authorization.md) | Accepted |
@@ -34,8 +34,11 @@ The single source of truth for "how many ADRs / what are they" — nothing else 
 | [0028: API backward compatibility — v1 stays additive-only](0028-api-backward-compatibility.md) | Accepted |
 | [0029: Periodic data-integrity reconciliation](0029-data-integrity-reconciliation.md) | Accepted |
 | [0030: Account lifecycle — password hashing, verification, reset](0030-account-lifecycle.md) | Accepted |
-| [0031: i18n architecture decided now, translations later](0031-internationalization.md) | Accepted |
+| [0031: i18n architecture decided now, translations later (web)](0031-internationalization.md) | Accepted, scope note added 2026-08-28 (web-only; see 0034 for mobile) |
 | [0032: iOS uses Compose Multiplatform UI, decided early](0032-ios-compose-multiplatform.md) | Accepted |
+| [0033: Navigation — androidx.navigation](0033-navigation.md) | Accepted |
+| [0034: Mobile-side i18n via compose.resources](0034-mobile-resources-i18n.md) | Accepted |
+| [0035: MVI containers extend multiplatform ViewModel](0035-multiplatform-viewmodel.md) | Accepted |
 
 ## Human-review-required lanes (canonical list — ADR-0017, amended by ADR-0023, ADR-0024)
 

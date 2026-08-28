@@ -1,7 +1,7 @@
 # ADR-0010: Lightweight, hand-rolled MVI for the shared presentation layer
 
 ## Status
-Accepted, amended 2026-08-28 (stale cross-reference fixed — ADR-0032 later decided iOS's UI framework; the decision below is unchanged)
+Accepted, amended 2026-08-28 twice: (1) stale cross-reference fixed — ADR-0032 later decided iOS's UI framework; (2) ADR-0035 resolved this ADR's own ambiguity about whether the MVI container extends `androidx.lifecycle.ViewModel`. Neither amendment changes the decision below.
 
 ## Context
 Phase 3 (Android) and Phase 4 (iOS) need a presentation-layer pattern. MVVM (View binds to a ViewModel's observable properties, multiple methods mutate loosely-coupled state) and MVI (View dispatches Intents, a single reducer computes new immutable State) are the realistic choices. The decision has to be made against the *full* roadmap, not just Phase 3's initial screens — split-type validation (equal/exact/percentage/itemized), settle-up preview (ADR-0007), multi-currency conversion (async, race-prone), Phase 5 offline sync (local-optimistic/pending/conflict states), and Phase 6 budget/report derived state all stress MVVM's loosely-coupled mutation model in ways that get progressively worse, not better, as the app grows. Retrofitting unidirectional flow after MVVM ViewModels are entrenched — right as Phase 5 needs it — would be a presentation-layer rewrite, the same failure mode ADR-0001 exists to prevent at the domain layer.

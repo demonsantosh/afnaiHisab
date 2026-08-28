@@ -32,20 +32,23 @@ All of the following are pure functions/classes in `core`'s domain package, fram
 - **Split validation**: equal / exact / percentage / weighted / itemized splits must always sum to the expense total; reject at the domain layer, not just at the UI form layer.
 - **Settle-up / debt simplification (ADR-0007)**: `List<MemberBalance> -> List<Settlement>` via greedy largest-creditor/largest-debtor matching (two max-heaps or sort + two-pointer), O(n log n). Deliberately not min-flow/Ford-Fulkerson — NP-complete for true minimality, not worth the complexity for this feature's actual value.
 
-## Presentation layer (mobile, ADR-0010, ADR-0021)
+## Presentation layer (mobile, ADR-0010, ADR-0021, ADR-0032, ADR-0035)
 
-MVI, hand-rolled, living in `core`'s `presentation` package — shared between Android and iOS regardless of which UI framework iOS ends up using (Compose Multiplatform UI or SwiftUI, still undecided per Phase 4). Every platform's UI is declarative (ADR-0021): React on web, Compose Multiplatform UI on Android (not plain Android-only Jetpack Compose — the multiplatform version is what keeps sharing actual UI code with iOS a real option, not just this MVI state layer). Per screen with real state complexity:
+MVI, hand-rolled, living in `core`'s `presentation` package — shared between Android and iOS, both on Compose Multiplatform UI (ADR-0032, decided early). Every platform's UI is declarative (ADR-0021): React on web, Compose Multiplatform UI on mobile. Per screen with real state complexity:
 
 ```
 Intent (sealed)  ──dispatch──>  reduce(state, intent) ──>  State (immutable data class)
                                         │
-                                        └──> Effect (SharedFlow) — one-off events: navigation, snackbars
+                                        └──> Effect (SharedFlow) — one-off events: navigation (ADR-0033), snackbars
 ```
 
 - `MutableStateFlow<State>` is the single source of truth per screen — no parallel mutable properties.
+- The container holding that `StateFlow` extends `androidx.lifecycle.ViewModel` and uses `viewModelScope` (ADR-0035) — the reducer/Intent/State/Effect shape stays exactly as hand-rolled as decided in ADR-0010; only the container's lifecycle-scoping mechanism is the platform-provided one, not a bespoke `CoroutineScope`.
 - Applied to genuinely stateful screens: expense form (multi split-type validation), settle-up preview, Phase 5 sync status. Trivial screens (settings, profile) use a plain state holder — not applied dogmatically everywhere.
 - No MVI framework (MVIKotlin/Orbit/Circuit) adopted up front — revisit only if hand-rolled boilerplate becomes a real pain point in Phase 3.
 - Reducers are pure functions, unit-tested in `commonTest` per ADR-0009 — the same testing leverage argument as the domain layer, one level up.
+- **Navigation** (ADR-0033): `androidx.navigation` (Navigation Compose Multiplatform) — official, stable since CMP 1.10.0. An `Effect` signals navigation intent; `NavController` does the actual routing. Type-safe route definitions from the start.
+- **Mobile resources/i18n** (ADR-0034): `compose.resources` — the mobile-side counterpart to ADR-0031's web-only `next-intl`. Same strings-wrapped-from-day-one discipline; translation *keys* stay conceptually aligned across the two tools only via a shared naming convention, not automatically.
 
 ## Data layer (mobile, Phase 3+)
 
