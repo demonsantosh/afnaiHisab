@@ -30,6 +30,11 @@ Last updated: 2026-08-28
 
 Both passes validated the same thing, not found it broken: the append-only/derive-on-read balance design is race-condition-safe by construction — confirmed twice now, not just assumed once.
 
+## Cross-document consistency sync + testing-strategy amendment (2026-08-28)
+Audited every doc against every other (not assumed in sync) — found and fixed three real drifts: `AGENTS.md`'s "Never do" list was missing 2 of 6 current human-review lanes, `kotlin-expert-review`'s frontmatter description was out of sync with its own body, and `domain-model.md` never documented ADR-0023's idempotency-key table or ADR-0012's Membership-audit widening. Fixed all three, then added the structural fix: `docs/adr/README.md` (ADR index) and `docs/INDEX.md` (documentation map + change-impact table), removing hardcoded ADR counts from three docs' prose so the number can't drift again.
+
+Also amended **ADR-0009**: essential test categories beyond unit tests, made explicit rather than left implicit — integration tests (already the pattern), a required real-HTTP API/contract test before Phase 2, explicit authorization tests (non-member rejected, ADR-0024) and idempotency tests (ADR-0023) per relevant route, and property-based testing specifically for the settle-up algorithm and rounding rule (upgraded from "optional"). Load/mutation/visual-regression testing explicitly deferred per ADR-0022's small-scale NFRs.
+
 ## Not started
 - `server` routes/repositories for this feature (Exposed table objects don't exist yet — see `docs/guidelines/exposed-koin.md` before writing them, including the idempotency-key, multi-row-transaction-atomicity, and operational-limits requirements).
 - The periodic Postgres backup export (ADR-0025) and data-integrity reconciliation query (ADR-0029) — both process/discipline items, not yet actually set up, low urgency while staging holds only test data.

@@ -58,11 +58,14 @@ Last verified: 2026-08-27, on this machine (macOS/Darwin, arm64) — updated aft
 | Layer | Tool |
 |---|---|
 | `core` domain logic (`commonTest`) | `kotlin.test` + `kotlinx-coroutines-test` |
-| `server` integration tests | `ktor-server-test-host` |
+| `server` integration tests (routes, repositories against real H2) | `ktor-server-test-host` |
+| `server` API/contract tests (real HTTP round-trip) | required before Phase 2 ships (ADR-0009 amendment) — a client (e.g. `curl`/an HTTP test client), not just an in-process route test |
 | `core` networking | `MockEngine` |
+| Authorization tests (non-member rejected, ADR-0024) | `ktor-server-test-host`, one per ledger-scoped route |
+| Idempotency tests (repeated key, ADR-0023) | `ktor-server-test-host` |
 | Coverage | Kover |
 | Kotlin lint/format | ktlint (ADR-0019) |
-| Property-based testing (optional) | Kotest — only if specifically needed for ADR-0007's settle-up function |
+| Property-based testing | Kotest — specifically for ADR-0007's settle-up function and the rounding rule (ADR-0009 amendment; not adopted project-wide) |
 | Web unit/component | Vitest + React Testing Library |
 | Web E2E | Playwright |
 | Android UI | Compose UI testing (`androidx.compose.ui.test`) — standard, no separate tool |

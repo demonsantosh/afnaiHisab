@@ -24,6 +24,7 @@ What "implemented well" means in this codebase, distilled from two sources: this
 - One behavior per test, named after what it proves, not its mechanics (`` `AC-2 allocates the leftover minor units to the lowest membershipIds, sum always exact` ``, not `test2`).
 - Exhaustive/parameterized coverage for edge cases with an independent reference computation to check against (AC-2's 9-case rounding test), not a single happy path.
 - Every spec acceptance criterion maps to at least one test (ADR-0016) — an untested criterion is a visible gap, not a silent one.
+- Beyond unit tests, per ADR-0009's amendment: integration tests (real H2/route, not mocked) for every repository and route; at least one real HTTP-level API/contract test before Phase 2 ships (an in-process route test can pass while the actual wire format is wrong); an explicit negative authorization test (non-member rejected) per ledger-scoped route (ADR-0024); an explicit idempotency test (repeated key returns the original response, ADR-0023); property-based tests specifically for the settle-up algorithm and the rounding rule, where "this invariant holds for any input" is stronger than enumerating cases by hand.
 
 ## 4. Ktor / backend
 - Routes are thin: validate input shape, call `core`, map the result to a response. No business logic, no persistence logic beyond calling a repository.

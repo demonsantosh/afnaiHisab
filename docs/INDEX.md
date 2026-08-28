@@ -41,6 +41,7 @@ Read this when: you're about to change something and aren't sure what else it to
 | A new tool is adopted or a version changes | `docs/TOOLING.md`; `AGENTS.md`'s build/test commands if user-facing; the relevant guidelines doc |
 | Phase scope changes (a feature moves phase, a phase's "done when" changes) | `docs/PLAN.md`; `docs/FEATURES.md`; `docs/STATUS.md`'s "Not started"/"Next step" |
 | A new project-specific Skill or Agent is added | `docs/WORKFLOW.md`'s "Skills already available"/delegation table; `docs/STATUS.md`'s reference-docs line |
+| The testing strategy changes (a new required test category, a new tool) | `docs/adr/0009-testing-strategy.md` (canonical); `docs/EXPERT_GUIDELINES.md` §3; `docs/TOOLING.md`'s testing table |
 
 ## Known intentional duplications (double-check these by hand — nothing enforces their sync automatically)
 
