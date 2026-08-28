@@ -17,11 +17,20 @@ data class ApiErrorEnvelope(
 /**
  * @property code a stable, machine-readable identifier clients may branch on — see [ApiErrorCode].
  * @property message human-readable text, safe to show a user; never leaks internals or stack traces.
+ * @property field which request field this error is about (`"password"`, `"email"`), for a
+ *   field-level validation rejection (`docs/specs/registration-login.md` AC-R3/AC-R4). `null` for
+ *   an error that isn't about one specific field. A single [ApiError] carries at most one field —
+ *   when [com.afnaihisab.core.validation.ValidationResult.Invalid] accumulates more than one
+ *   violation, the server maps only the first to the wire envelope; this is a deliberate,
+ *   documented simplification of ADR-0015's one-code/one-message/one-field envelope shape, not a
+ *   bug — `core`'s [com.afnaihisab.core.validation.ValidationResult] itself still carries every
+ *   violation for any future consumer that wants all of them at once.
  */
 @Serializable
 data class ApiError(
     val code: String,
     val message: String,
+    val field: String? = null,
 )
 
 /**

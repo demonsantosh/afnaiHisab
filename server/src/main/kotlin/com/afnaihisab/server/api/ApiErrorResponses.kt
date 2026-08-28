@@ -19,6 +19,7 @@ suspend fun ApplicationCall.respondError(
     status: HttpStatusCode,
     code: String,
     message: String,
+    field: String? = null,
 ) {
-    respond(status, ApiErrorEnvelope(ApiError(code = code, message = message)))
+    respond(status, ApiErrorEnvelope(ApiError(code = code, message = message, field = field)))
 }

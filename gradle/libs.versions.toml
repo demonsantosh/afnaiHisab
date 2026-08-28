@@ -18,6 +18,11 @@ hikari = "7.1.0"
 logback = "1.5.38"
 dotenv = "6.5.1"
 
+# Auth (ADR-0008 JWT access/refresh, ADR-0030 Argon2id) — verified current on Maven Central
+# 2026-08-28, not assumed from training data.
+argon2 = "2.12"
+auth0Jwt = "4.6.0"
+
 # Quality tooling
 kover = "0.9.9"
 ktlint = "14.2.0"
@@ -42,7 +47,15 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor" }
 ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
 ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
+ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
+ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
+
+# --- server test: a real HTTP client for the ADR-0009 API/contract test (a real socket, not
+# ktor-server-test-host's in-process one) ---
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 
 # --- server: DI (ADR-0005) ---
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
@@ -60,6 +73,10 @@ hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
 # --- server: misc ---
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 dotenv-kotlin = { module = "io.github.cdimascio:dotenv-kotlin", version.ref = "dotenv" }
+
+# --- server: auth (ADR-0008, ADR-0030) ---
+argon2-jvm = { module = "de.mkammerer:argon2-jvm", version.ref = "argon2" }
+auth0-java-jwt = { module = "com.auth0:java-jwt", version.ref = "auth0Jwt" }
 
 [plugins]
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

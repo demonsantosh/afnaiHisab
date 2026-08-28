@@ -44,6 +44,8 @@ dependencies {
     implementation(libs.ktor.server.cors)
     implementation(libs.ktor.server.status.pages)
     implementation(libs.ktor.server.call.logging)
+    implementation(libs.ktor.server.auth)
+    implementation(libs.ktor.server.auth.jwt)
 
     // DI (ADR-0005)
     implementation(libs.koin.core)
@@ -62,8 +64,20 @@ dependencies {
     implementation(libs.dotenv.kotlin)
     implementation(libs.logback.classic)
 
+    // Auth: Argon2id password hashing (ADR-0030) + JWT access/refresh tokens (ADR-0008). java-jwt
+    // is already transitively pulled in by ktor-server-auth-jwt above, but AuthService/JwtService
+    // import it directly, so it is declared explicitly here too rather than relied on implicitly.
+    implementation(libs.argon2.jvm)
+    implementation(libs.auth0.java.jwt)
+
     testImplementation(kotlin("test"))
     testImplementation(libs.ktor.server.test.host)
+    testImplementation(libs.kotlinx.coroutines.test)
+    // A real HTTP client for the ADR-0009 API/contract test — a real socket against a bound port,
+    // not ktor-server-test-host's in-process test engine.
+    testImplementation(libs.ktor.client.core)
+    testImplementation(libs.ktor.client.cio)
+    testImplementation(libs.ktor.client.content.negotiation)
 }
 
 // `/api/v1/health` reports the built version; substitute it here so it can never drift from

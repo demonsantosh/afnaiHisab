@@ -28,6 +28,9 @@ class MigrationTest {
                     "select id, expense_id, membership_id, amount, share_value from splits",
                     "select id, ledger_id, from_membership_id, to_membership_id, amount, currency, " +
                         "note, created_at from settlements",
+                    "select user_id, idempotency_key, response_body, response_status, created_at from idempotency_keys",
+                    "select id, user_id, family_id, issued_at, expires_at, revoked_at, " +
+                        "replaced_by_id from refresh_sessions",
                 ).forEach { query ->
                     val rows = exec("$query where 1 = 0") { resultSet -> resultSet.next() }
                     assertEquals(false, rows, "unexpected rows from: $query")
@@ -59,9 +62,10 @@ class MigrationTest {
                         resultSet.getString(1)
                     }
                 }
-            // Bump this when a new migration lands (currently V2 — see V2__add_missing_fk_indexes.sql)
-            // so this test keeps proving "re-running migrate is a no-op," not "we're still on V1."
-            assertTrue(version == "2", "expected latest schema version 2, got $version")
+            // Bump this when a new migration lands (currently V4 — see V3__add_idempotency_keys.sql
+            // and V4__add_refresh_sessions.sql) so this test keeps proving "re-running migrate is a
+            // no-op," not "we're still on V1."
+            assertTrue(version == "4", "expected latest schema version 4, got $version")
         }
     }
 }

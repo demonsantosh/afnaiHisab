@@ -1,5 +1,6 @@
 package com.afnaihisab.server
 
+import com.afnaihisab.server.auth.configureAuthentication
 import com.afnaihisab.server.config.AppConfig
 import com.afnaihisab.server.db.DatabaseFactory
 import com.afnaihisab.server.di.serverModule
@@ -48,6 +49,7 @@ fun Application.module(config: AppConfig = AppConfig.load()) {
     // in ADR-0015's envelope.
     configureErrorHandling()
     configureCors(config)
+    configureAuthentication(config)
     configureRouting()
 
     monitor.subscribe(ApplicationStopped) {

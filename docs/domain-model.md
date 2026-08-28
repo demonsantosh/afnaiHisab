@@ -115,15 +115,20 @@ UUIDv7 for every entity's primary key — time-sortable, which makes it a natura
 
 **Invariant:** append-only — rows are never updated or deleted, even by ADR-0014's anonymization (which redacts `changedByUserId`'s linked PII elsewhere, not this table's rows).
 
-### IdempotencyKey (Phase 2+, ADR-0023 — not built in Phase 0/1, shape documented now)
+### IdempotencyKey (ADR-0023 — built in Phase 1 alongside `docs/specs/expense-split-balance-api.md`)
 | Field | Type | Notes |
 |---|---|---|
-| key | UUID | client-generated, unique per logical action attempt (primary key) |
-| responseBody | JSON | the original response, replayed verbatim on a repeated key |
+| userId | UUID | the *authenticated requester* who sent the key — see the scoping invariant below. No FK to `users`: this table is a short-lived operational log, not a durable relationship, and must stay resolvable even after ADR-0014 anonymizes a user |
+| key | UUID | client-generated, unique per logical action attempt *for that user*. Column name is `idempotency_key`, not the bare `key` — `key` collides with the reserved SQL keyword used in `PRIMARY KEY`/`FOREIGN KEY`, which H2 rejects as an unquoted identifier (`V3__add_idempotency_keys.sql`) |
+| responseBody | text | the original response's exact JSON text, replayed verbatim on a repeated key. `text`, not a native JSON column type — Exposed 1.x has no JSON column builder without an extra contrib module |
 | responseStatus | Int | the original HTTP status code |
 | createdAt | Instant | for the eventual retention/cleanup policy (not designed yet — ADR-0023) |
 
-**Invariant:** checking and inserting a key must be one atomic transaction with the write it guards (`docs/guidelines/exposed-koin.md`) — a check-then-insert race would let two concurrent retries both pass.
+**Primary key:** the composite `(userId, key)`, not `key` alone.
+
+**Invariants:**
+- Checking and inserting a key must be one atomic transaction with the write it guards (`docs/guidelines/exposed-koin.md`) — a check-then-insert race would let two concurrent retries both pass.
+- **Scoping (kotlin-expert-review finding, 2026-08-28):** a key is only ever looked up/stored scoped by the authenticated requester's `userId`, never by `key` alone. An unscoped key is a cross-tenant leak: a colliding or reused key value from a *different* user would otherwise return that other user's cached response verbatim — most exploitable on `POST /ledgers`, which has no ADR-0024 membership gate to catch it first (a ledger-scoped route's membership check would at least confine the blast radius to that ledger's members). `userId` is always the authenticated caller, never a value taken from the request body.
 
 ## Derived (never stored)
 
