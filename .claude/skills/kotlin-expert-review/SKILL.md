@@ -12,7 +12,7 @@ A project-specific correctness/quality gate for AfnaiHisab's Kotlin and Kotlin M
 ## When to use
 
 - Before merging any change to `core` or `server`.
-- Always — not optionally — for a diff touching ADR-0017's human-review lanes: balance/settle-up money math, auth/token handling, deletion/anonymization logic, the audit log.
+- Always — not optionally — for a diff touching ADR-0017's human-review lanes: balance/settle-up money math, auth/token handling, deletion/anonymization logic, the audit log, ledger-membership authorization checks (ADR-0024), idempotency-key handling (ADR-0023).
 - After a TDD green-phase pass (a stub's `TODO()` replaced with real logic) — this is exactly where guideline §2's "KDoc must stop claiming not-yet-implemented" and §3's "every AC still has a passing test" matter most.
 
 ## How to review
@@ -23,7 +23,8 @@ A project-specific correctness/quality gate for AfnaiHisab's Kotlin and Kotlin M
 4. Read every changed file completely — not a diff-only skim — since several guidelines (KDoc staleness, layer-boundary violations, missing tests for an AC) only show up by reading the whole function/file, not the changed lines in isolation.
 5. Check each changed file against every applicable section of `docs/EXPERT_GUIDELINES.md` (and `docs/guidelines/exposed-koin.md` where relevant). Skip sections that don't apply (e.g. §4 Ktor/backend has nothing to say about a pure `core` domain file).
 6. For anything touching money math, balances, settlements, auth, or deletion: explicitly confirm the diff still matches its `docs/specs/*.md` acceptance criteria one by one, not just "looks reasonable."
-7. Verify build health as part of the review, not just code reading — run (with `JAVA_HOME` set to the project's Homebrew `openjdk@17`, per `docs/TOOLING.md`):
+7. For any new/changed `server` route: confirm it checks the requester's ledger membership before acting (ADR-0024) and that mutating financial routes handle an `Idempotency-Key` correctly (ADR-0023) — both are easy to miss in a happy-path review and invisible until someone tries the wrong id or a retried request.
+8. Verify build health as part of the review, not just code reading — run (with `JAVA_HOME` set to the project's Homebrew `openjdk@17`, per `docs/TOOLING.md`):
    ```
    ./gradlew ktlintCheck detekt --no-daemon
    ./gradlew :core:jvmTest :server:test --no-daemon

@@ -10,10 +10,10 @@ Last updated: 2026-08-28
 - One thing to know: `main` briefly diverged because a `README.md` title was added directly via GitHub's web UI while this session was working on a feature branch — merged cleanly (no conflict, `README.md` was untouched by anything else).
 
 ## Reference docs (stable — read once, don't re-derive)
-`PLAN.md` (roadmap) · `FEATURES.md` (scope) · `ARCHITECTURE.md` (technical design) · `TOOLING.md` (tool inventory + the corporate-TLS-proxy fix) · `domain-model.md` (entity fields/invariants) · `WORKFLOW.md` (delegation rules + token-optimization policy) · `AGENTS.md` (repo-root cross-tool contract) · `EXPERT_GUIDELINES.md` + `docs/guidelines/{exposed-koin,nextjs-react-typescript}.md` (tool-specific coding standards) · 21 ADRs · `.claude/agents/{afnaihisab-backend,afnaihisab-web}.md` · `.claude/skills/{kotlin,web}-expert-review/`.
+`PLAN.md` (roadmap) · `FEATURES.md` (scope) · `ARCHITECTURE.md` (technical design) · `TOOLING.md` (tool inventory + the corporate-TLS-proxy fix) · `domain-model.md` (entity fields/invariants) · `WORKFLOW.md` (delegation rules + token-optimization policy) · `AGENTS.md` (repo-root cross-tool contract) · `EXPERT_GUIDELINES.md` + `docs/guidelines/{exposed-koin,nextjs-react-typescript}.md` (tool-specific coding standards) · 25 ADRs · `.claude/agents/{afnaihisab-backend,afnaihisab-web}.md` · `.claude/skills/{kotlin,web}-expert-review/`.
 
 ## Done
-- **Planning** (Phase 0): vision, domain model, architecture, feature tiers, tooling, 21 ADRs — see the reference docs above for what's in each.
+- **Planning** (Phase 0): vision, domain model, architecture, feature tiers, tooling, 25 ADRs — see the reference docs above for what's in each.
 - **Phase 0 scaffolding**: `core`/`server`/`web` all build and run; CI workflow written; GitHub remote connected.
 - **Declarative UI made explicit** (ADR-0021): every platform's UI is declarative (React, Compose Multiplatform UI, SwiftUI-or-Compose-Multiplatform-UI) — this was already implicit in ADR-0003/ADR-0010 but never stated as its own principle. Also settles a real gap: Android's choice is explicitly Compose Multiplatform UI, not Android-only Jetpack Compose, since only the multiplatform version keeps sharing UI code with iOS a real option later.
 - **Process infrastructure**: `docs/specs/*.md` (EARS spec-before-code), `EXPERT_GUIDELINES.md` + tool-specific guideline docs, `kotlin-expert-review`/`web-expert-review` skills, `afnaihisab-backend`/`afnaihisab-web` project-scoped agents, a documented token-optimization policy (`WORKFLOW.md`).
@@ -23,8 +23,11 @@ Last updated: 2026-08-28
 ## Verified (current)
 `./gradlew ktlintCheck detekt --no-daemon` clean · `./gradlew :core:jvmTest` 15/15 **green** · `./gradlew :server:test` 8/8 green · configuration cache stores/reuses cleanly.
 
+- **System-design review** (2026-08-28), expert-level, four real gaps found and fixed as ADRs, not just noted: **ADR-0022** (non-functional requirements were never stated — small-scale, best-effort availability, strong consistency within a ledger, now explicit), **ADR-0023** (idempotency keys required on mutating financial endpoints — a naive client retry would otherwise create a duplicate expense/settlement), **ADR-0024** (ledger-membership authorization made an explicit, enforced, human-review-required rule — closes a potential IDOR gap), **ADR-0025** (backup/DR: Neon's free tier is only a 6-hour PITR window, never evaluated when ADR-0018 picked it for uptime/cost alone — a periodic independent export is now required). One thing *validated*, not fixed: the append-only/derive-on-read balance design is race-condition-safe by construction, confirmed by this review, not just assumed.
+
 ## Not started
-- `server` routes/repositories for this feature (Exposed table objects don't exist yet — see `docs/guidelines/exposed-koin.md` before writing them).
+- `server` routes/repositories for this feature (Exposed table objects don't exist yet — see `docs/guidelines/exposed-koin.md` before writing them, including the new idempotency-key and multi-row-transaction-atomicity requirements).
+- The periodic Postgres backup export (ADR-0025) — process/discipline item, not yet actually set up, low urgency while staging holds only test data.
 - Any `web/` UI.
 - CI has never actually run against `main` yet (first push to trigger it happens whenever the next push lands — nothing blocking this now that everything's on `main` directly).
 - Docker/Postgres still not installed — H2 carries local dev, as planned.

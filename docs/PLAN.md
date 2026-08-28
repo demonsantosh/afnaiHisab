@@ -35,6 +35,12 @@
 | ADR-0019 | Tooling: JDK 17, Flyway migrations, ktlint, npm, Vitest+RTL+Playwright, Swift Package Manager, GitHub + GitHub Actions |
 | ADR-0020 | Web stays on client-side `lib/api.ts` for reads and writes (no Server Actions calling Ktor) — `useActionState` for form UX only |
 | ADR-0021 | Every platform's UI is declarative (React, Compose Multiplatform UI, SwiftUI or Compose Multiplatform UI) — Android's choice is explicitly Compose Multiplatform UI, not Android-only Jetpack Compose |
+| ADR-0022 | Non-functional requirements stated explicitly: small-scale, best-effort availability, strong consistency within a ledger, interactive-latency only |
+| ADR-0023 | Idempotency keys required on mutating financial endpoints — a retried request never creates a duplicate expense/settlement |
+| ADR-0024 | Ledger-membership authorization is an explicit, enforced, human-review-required rule on every ledger-scoped route |
+| ADR-0025 | Backup/DR: don't rely solely on the hosting provider's default retention (Neon's free tier is only 6h PITR) — periodic independent export required |
+
+System-design review (2026-08-28): non-functional requirements, idempotency, authorization, and backup/DR were the four real gaps found; the append-only/derive-on-read balance design (`docs/PLAN.md` §3) was validated as race-condition-safe by construction, not by locking.
 
 Full technical rationale: `docs/ARCHITECTURE.md`. Feature scope: `docs/FEATURES.md`. Repo-root agent instructions: `AGENTS.md`. Tool inventory: `docs/TOOLING.md`.
 

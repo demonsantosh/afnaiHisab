@@ -32,6 +32,8 @@ Regardless of which agent generated the diff, changes touching these areas get f
 - Balance/settle-up money math (ADR-0007) — silently wrong financial data is the worst failure mode this app has
 - Deletion/anonymization logic (ADR-0014)
 - The audit log's append-only guarantee (ADR-0012)
+- Ledger-membership authorization checks on any route (ADR-0024) — a missing check is an IDOR vulnerability, invisible in a happy-path review
+- Idempotency-key handling on mutating financial endpoints (ADR-0023) — a bug here reintroduces exactly the duplicate-record risk the feature exists to prevent
 
 Everything else follows the delegation table above without extra ceremony.
 

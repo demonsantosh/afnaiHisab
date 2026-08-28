@@ -16,6 +16,8 @@ Tool-specific deep dive for `server`'s not-yet-written repository layer (Phase 1
 - `suspendTransaction { }` (not `newSuspendedTransaction`) inside Ktor route handlers, since routes are suspend functions.
 - **Real gotcha, not a naming nit**: on JDBC, `suspendTransaction` is suspend-*shaped* but the underlying connection is still a blocking call — it does not make JDBC non-blocking on its own. Explicitly dispatch onto `Dispatchers.IO`, exactly the pattern `HealthRoutes.kt`'s DB probe already uses. Every repository call needs this, not just the health check.
 - Scope one transaction per repository function — don't span a transaction across multiple repository calls or into `core`'s use-case functions, which take plain data and never open a transaction themselves.
+- **Multi-row writes from one `core` result must be one transaction, not several.** `createEqualSplitExpense` returns one `Expense` plus N `Split`s as a single logical unit — the repository function persisting it must insert the expense and all its splits inside one `suspendTransaction`, not one transaction per insert. A partial write (expense saved, not all splits) would corrupt the sum-to-expense-amount invariant `core` already guarantees at the domain layer.
+- Idempotency-key checking (ADR-0023) belongs in the same transaction as the write it guards — check-and-insert as one atomic operation, not a separate read followed by a separate write, or two concurrent retries could both pass the check.
 
 ## Repository pattern + Koin
 - `interface FooRepository` (returns/accepts `core` domain types only, lives conceptually alongside the domain it serves) + `class ExposedFooRepository : FooRepository` (the only class that imports Exposed types for that repository).
