@@ -92,7 +92,7 @@ UUIDv7 for every entity's primary key — time-sortable, which makes it a natura
 | Field | Type | Notes |
 |---|---|---|
 | id | UUID | |
-| entityType | enum `EXPENSE` \| `SETTLEMENT` | |
+| entityType | enum `EXPENSE` \| `SETTLEMENT` \| `MEMBERSHIP` | widened 2026-08-28 (ADR-0012 amendment) — a silent membership change is the same trust violation as a silent edit |
 | entityId | UUID | |
 | changedByUserId | UUID | subject to ADR-0014's anonymization on deletion request |
 | changeType | enum `CREATE` \| `UPDATE` \| `DELETE` | |
@@ -101,6 +101,16 @@ UUIDv7 for every entity's primary key — time-sortable, which makes it a natura
 | timestamp | Instant | |
 
 **Invariant:** append-only — rows are never updated or deleted, even by ADR-0014's anonymization (which redacts `changedByUserId`'s linked PII elsewhere, not this table's rows).
+
+### IdempotencyKey (Phase 2+, ADR-0023 — not built in Phase 0/1, shape documented now)
+| Field | Type | Notes |
+|---|---|---|
+| key | UUID | client-generated, unique per logical action attempt (primary key) |
+| responseBody | JSON | the original response, replayed verbatim on a repeated key |
+| responseStatus | Int | the original HTTP status code |
+| createdAt | Instant | for the eventual retention/cleanup policy (not designed yet — ADR-0023) |
+
+**Invariant:** checking and inserting a key must be one atomic transaction with the write it guards (`docs/guidelines/exposed-koin.md`) — a check-then-insert race would let two concurrent retries both pass.
 
 ## Derived (never stored)
 

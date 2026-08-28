@@ -3,9 +3,10 @@
 AfnaiHisab — Splitwise-style expense splitter evolving into a multipurpose accounting app. KMP learning project: Ktor backend, shared Kotlin `core` module, Next.js web (Phase 1), Android/iOS via KMP (Phase 3/4).
 
 ## Where to look before making changes
+- `docs/INDEX.md` — documentation map + change-impact table; read this if unsure what else needs updating alongside a change
 - `docs/STATUS.md` — current phase and what's actually done
 - `docs/PLAN.md` — phased roadmap, "done when" criteria per phase
-- `docs/adr/` — one file per architectural/process decision, with rationale (read before contradicting one)
+- `docs/adr/README.md` — the ADR index (current count/list — don't hardcode it elsewhere); `docs/adr/` itself has one file per decision, with rationale (read before contradicting one)
 - `docs/FEATURES.md` — scoped feature list per phase
 - `docs/specs/<feature>.md` — per-feature acceptance criteria (ADR-0016), write one before implementing a feature
 - `docs/EXPERT_GUIDELINES.md` — this project's own distilled expert-level standard (Kotlin idioms, domain-layer purity, testing discipline, Ktor conventions, build hygiene, money-math correctness), earned from a real best-practice audit — read before writing `core`/`server` code, not just before reviewing it. Enforced by the `kotlin-expert-review` skill.
@@ -35,7 +36,7 @@ AfnaiHisab — Splitwise-style expense splitter evolving into a multipurpose acc
 - Hardcode secrets — `.env` locally, platform secret store in prod (ADR-0015).
 - Hard-delete user data — anonymize instead (ADR-0014).
 - Silently change the audit log's append-only guarantee (ADR-0012).
-- Merge changes to auth, settle-up money math, deletion logic, or the audit log without explicit human review (ADR-0017) — these lanes are never auto-approved regardless of how the change was generated.
+- Merge changes to auth, settle-up money math, deletion logic, the audit log, ledger-membership authorization checks (ADR-0024), or idempotency-key handling (ADR-0023) without explicit human review (ADR-0017) — these lanes are never auto-approved regardless of how the change was generated. Current list lives in ADR-0017 and its amendments — check there if unsure, this line can drift (see `docs/INDEX.md`).
 
 ## Model
 Planned and reviewed using Claude Sonnet 5 (`claude-sonnet-5`) via Claude Code.

@@ -1,6 +1,6 @@
 ---
 name: kotlin-expert-review
-description: AfnaiHisab-specific, stricter review of core/server Kotlin/KMP changes against docs/EXPERT_GUIDELINES.md + docs/guidelines/exposed-koin.md. Required before merging core/server work, always for ADR-0017 human-review lanes (money math, auth, deletion, audit log). Use web-expert-review for web/ instead.
+description: AfnaiHisab-specific, stricter review of core/server Kotlin/KMP changes against docs/EXPERT_GUIDELINES.md + docs/guidelines/exposed-koin.md. Required before merging core/server work, always for ADR-0017's human-review lanes (see this file's body for the current list — don't duplicate it elsewhere). Use web-expert-review for web/ instead.
 ---
 
 # Kotlin Expert Review

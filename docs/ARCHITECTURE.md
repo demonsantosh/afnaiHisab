@@ -1,6 +1,6 @@
 # Architecture — AfnaiHisab
 
-Technical reference consolidating ADR-0001 through ADR-0029. Read `docs/PLAN.md` for phases/roadmap, `docs/FEATURES.md` for scope, `AGENTS.md` for the repo-root agent contract, `docs/TOOLING.md` for the concrete tool inventory, and `docs/EXPERT_GUIDELINES.md` plus `docs/guidelines/*.md` (tool-specific: Exposed/Koin, Next.js/React/TypeScript) for the coding standard itself (enforced by the `kotlin-expert-review` and `web-expert-review` skills); this doc is "how it's actually built."
+Technical reference consolidating every ADR (`docs/adr/README.md` is the current index — don't hardcode a count here, it goes stale). Read `docs/PLAN.md` for phases/roadmap, `docs/FEATURES.md` for scope, `AGENTS.md` for the repo-root agent contract, `docs/TOOLING.md` for the concrete tool inventory, `docs/INDEX.md` for the full documentation map, and `docs/EXPERT_GUIDELINES.md` plus `docs/guidelines/*.md` (tool-specific: Exposed/Koin, Next.js/React/TypeScript) for the coding standard itself (enforced by the `kotlin-expert-review` and `web-expert-review` skills); this doc is "how it's actually built."
 
 ## Module layout (ADR-0001, amended)
 
