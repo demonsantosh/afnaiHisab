@@ -32,9 +32,9 @@ All of the following are pure functions/classes in `core`'s domain package, fram
 - **Split validation**: equal / exact / percentage / weighted / itemized splits must always sum to the expense total; reject at the domain layer, not just at the UI form layer.
 - **Settle-up / debt simplification (ADR-0007)**: `List<MemberBalance> -> List<Settlement>` via greedy largest-creditor/largest-debtor matching (two max-heaps or sort + two-pointer), O(n log n). Deliberately not min-flow/Ford-Fulkerson — NP-complete for true minimality, not worth the complexity for this feature's actual value.
 
-## Presentation layer (mobile, ADR-0010)
+## Presentation layer (mobile, ADR-0010, ADR-0021)
 
-MVI, hand-rolled, living in `core`'s `presentation` package — shared between Android and iOS regardless of which UI framework iOS ends up using (Compose Multiplatform UI or SwiftUI, still undecided per Phase 4). Per screen with real state complexity:
+MVI, hand-rolled, living in `core`'s `presentation` package — shared between Android and iOS regardless of which UI framework iOS ends up using (Compose Multiplatform UI or SwiftUI, still undecided per Phase 4). Every platform's UI is declarative (ADR-0021): React on web, Compose Multiplatform UI on Android (not plain Android-only Jetpack Compose — the multiplatform version is what keeps sharing actual UI code with iOS a real option, not just this MVI state layer). Per screen with real state complexity:
 
 ```
 Intent (sealed)  ──dispatch──>  reduce(state, intent) ──>  State (immutable data class)

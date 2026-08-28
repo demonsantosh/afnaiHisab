@@ -34,6 +34,7 @@
 | ADR-0018 | Free staging environment (Koyeb + Neon + Vercel Hobby) for multi-user/mobile testing before production, with an explicit promotion gate |
 | ADR-0019 | Tooling: JDK 17, Flyway migrations, ktlint, npm, Vitest+RTL+Playwright, Swift Package Manager, GitHub + GitHub Actions |
 | ADR-0020 | Web stays on client-side `lib/api.ts` for reads and writes (no Server Actions calling Ktor) — `useActionState` for form UX only |
+| ADR-0021 | Every platform's UI is declarative (React, Compose Multiplatform UI, SwiftUI or Compose Multiplatform UI) — Android's choice is explicitly Compose Multiplatform UI, not Android-only Jetpack Compose |
 
 Full technical rationale: `docs/ARCHITECTURE.md`. Feature scope: `docs/FEATURES.md`. Repo-root agent instructions: `AGENTS.md`. Tool inventory: `docs/TOOLING.md`.
 
@@ -110,6 +111,7 @@ afnaihisab/
 ### Phase 3 — KMP shared module → Android
 - `core`'s data layer becomes real multiplatform (expect/actual, ktor-client networking, MockEngine-tested per ADR-0009)
 - `app/androidApp` consumes `core` directly — no HTTP-boundary reimplementation
+- UI is Compose Multiplatform UI (ADR-0021), not plain Android-only Jetpack Compose — get the Gradle setup right at this phase's start, not mid-implementation
 - Local read-through cache via SQLDelight per ADR-0006, server still authoritative per ADR-0002
 - Secure token storage (Keystore) + push notifications (FCM) per ADR-0011; biometric app-lock + session timeout per ADR-0013
 - Debug builds point at the Phase 2 staging URL directly (Koyeb, already public per ADR-0018) — no tunnel needed since staging exists by this point in the roadmap. Emulator (`10.0.2.2`) or LAN IP only needed for iterating against a local `server` before pushing to staging.

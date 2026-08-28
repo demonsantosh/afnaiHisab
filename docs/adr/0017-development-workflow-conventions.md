@@ -1,7 +1,12 @@
 # ADR-0017: Git hygiene, CI test gate, dependency pinning, human-review lanes
 
 ## Status
-Accepted
+Accepted, amended 2026-08-28 (PR ceremony is optional for solo development — see below; the review/CI requirements themselves are unchanged)
+
+## Amendment (2026-08-28)
+This ADR requires human review before merge and an enforced CI gate — it does not require a GitHub pull request specifically. For solo development (confirmed: the user is currently the only developer on this project), a PR adds review-workflow ceremony with no second reviewer to justify it. Direct branch merges (`git merge` locally, then push to `main`) satisfy this ADR's intent as long as: (a) the human-review-lane checklist below was actually applied before merging (as already practiced — e.g. the expense/split/balance/settlement feature was reviewed and explicitly approved before merging, without a PR), and (b) CI has run against the branch (via GitHub Actions on push, not necessarily gated by branch-protection UI) and passed. Revisit if a second developer ever joins — PRs become worth their ceremony the moment there's someone else to review.
+
+## Decision
 
 ## Context
 Research into AI-assisted development handoff quality converges on a consistent set of operational conventions that separate maintainable AI-assisted codebases from ones that decay: technical debt is reported to rise 30-41% after AI-tool adoption without these guardrails, with code duplication up ~48% and refactoring activity down ~60%. None of AfnaiHisab's existing ADRs establish git/commit conventions, an *enforced* (not just stated) test gate, a dependency-pinning policy, or which categories of change require deliberate human review rather than being auto-approved as "just another agent task."

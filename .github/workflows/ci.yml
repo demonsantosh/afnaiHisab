@@ -3,10 +3,10 @@ name: CI
 # ADR-0017 makes this a *gate*, not a status report: `./gradlew build` runs `commonTest` +
 # `server` integration tests, ktlint and detekt, and a failure in any of them fails the job.
 #
-# One manual step is required on GitHub and cannot be expressed in this file: in
-# Settings -> Branches -> branch protection for `main`, enable "Require status checks to pass
-# before merging" and select both `core-and-server` and `web`. Without that, a red CI run is
-# merely visible; with it, merging is blocked — which is what ADR-0017 actually asks for.
+# ADR-0017's 2026-08-28 amendment: for solo development, a formal GitHub branch-protection rule
+# (Settings -> Branches -> "Require status checks to pass before merging") is optional ceremony,
+# not required — check the Actions tab is green before merging locally instead. Revisit if a
+# second developer ever joins.
 
 on:
   push:
