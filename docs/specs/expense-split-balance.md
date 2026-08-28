@@ -22,6 +22,7 @@ A member of a Ledger (personal or shared, ADR-0004) records an Expense with an e
 - AC-8: WHEN a member records a Settlement with a positive `amount` between two distinct memberships of the same Ledger, THE system SHALL create the Settlement and reflect it in subsequent balance calculations (AC-6).
 - AC-9: WHEN a Settlement is submitted with `fromMembershipId == toMembershipId`, THE system SHALL reject it.
 - AC-10: WHEN a Settlement is submitted with `amount <= 0`, THE system SHALL reject it.
+- AC-13: WHEN a Settlement is successfully recorded, THE system SHALL also report the balance between the two parties immediately before and immediately after the settlement, so what was settled — and whether anything remains — is never ambiguous to whoever recorded or views it. This is a use-case-level composition (`recordSettlement`), not a change to `createSettlement`'s validation responsibility (AC-8..AC-10) or to the `Settlement` record itself — no new stored field, no linkage to specific expenses (that would be a bigger, Splitwise-diverging design change this spec explicitly does not make).
 
 **Ledger/membership (prerequisite for the above)**
 - AC-11: WHEN a user creates a Ledger, THE system SHALL create exactly one Membership with role `OWNER` for that user.
