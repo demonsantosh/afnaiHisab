@@ -39,7 +39,8 @@ Everything else follows the delegation table above without extra ceremony.
 - `/sc:implement`, `/sc:build`, `/sc:test`, `/sc:troubleshoot` — SuperClaude command set already configured; use over ad-hoc prompting for their named purpose (implementation, build, test, debug) since they carry their own workflow discipline.
 - `/sc:design` — for any API or schema design pass before implementation (e.g., before Phase 1's Expense/Split endpoints).
 - `/code-review` — generic correctness/simplification pass; run at `high` effort at the end of each phase, `low`/`medium` for smaller mid-phase diffs.
-- `/kotlin-expert-review` — this project's own, stricter, project-specific gate (`docs/EXPERT_GUIDELINES.md`) — run this, not (or in addition to) generic `/code-review`, before merging any `core`/`server` change, and always for an ADR-0017 human-review-lane diff (money math, auth, deletion, audit log).
+- `/kotlin-expert-review` — this project's own, stricter, project-specific gate (`docs/EXPERT_GUIDELINES.md`, plus `docs/guidelines/exposed-koin.md` for repository-layer code) — run this, not (or in addition to) generic `/code-review`, before merging any `core`/`server` change, and always for an ADR-0017 human-review-lane diff (money math, auth, deletion, audit log).
+- `/web-expert-review` — the `web/` sibling (`docs/guidelines/nextjs-react-typescript.md`) — run before merging any `web/` change, especially anything touching how it calls the backend (ADR-0020).
 - `/security-review` — run once before Phase 2 deploy (auth, input handling, SQL/XSS) and again before any Phase 6 accounting data goes live.
 
 ## Project-root CLAUDE.md (to create once code exists)

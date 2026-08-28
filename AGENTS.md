@@ -9,6 +9,8 @@ AfnaiHisab — Splitwise-style expense splitter evolving into a multipurpose acc
 - `docs/FEATURES.md` — scoped feature list per phase
 - `docs/specs/<feature>.md` — per-feature acceptance criteria (ADR-0016), write one before implementing a feature
 - `docs/EXPERT_GUIDELINES.md` — this project's own distilled expert-level standard (Kotlin idioms, domain-layer purity, testing discipline, Ktor conventions, build hygiene, money-math correctness), earned from a real best-practice audit — read before writing `core`/`server` code, not just before reviewing it. Enforced by the `kotlin-expert-review` skill.
+- `docs/guidelines/exposed-koin.md` — Exposed 1.x + Koin repository-layer conventions (its package structure changed completely in 1.0; older tutorials reference paths that no longer compile). Read before writing any `server` persistence code.
+- `docs/guidelines/nextjs-react-typescript.md` — Next.js 16 / React 19 / TypeScript conventions for `web/`, including ADR-0020's client-side-fetch-not-Server-Actions decision. Read before writing any `web/` code. Enforced by the `web-expert-review` skill.
 
 ## Module boundaries (ADR-0001) — do not violate
 - `core/` — domain logic, data layer, validation, MVI presentation state. Framework-agnostic. This is the load-bearing module: business logic here is shared by server + Android + iOS.

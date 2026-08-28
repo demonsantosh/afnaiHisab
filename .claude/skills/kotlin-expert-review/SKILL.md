@@ -1,6 +1,6 @@
 ---
 name: kotlin-expert-review
-description: Review Kotlin/KMP code changes in AfnaiHisab against this project's own expert-level guidelines (docs/EXPERT_GUIDELINES.md) — Kotlin idioms, domain-layer purity, TDD/testing discipline, Ktor conventions, build hygiene, and money-math correctness. A stricter, project-specific sibling to the generic /code-review, informed by this project's own audits (ADR-0005/0009/0015/0017/0019) rather than generic advice. Use before merging any core/server change, and always for anything in ADR-0017's human-review lanes (money math, auth, deletion, audit log).
+description: Review Kotlin/KMP code changes in AfnaiHisab against this project's own expert-level guidelines (docs/EXPERT_GUIDELINES.md, plus docs/guidelines/exposed-koin.md for repository-layer code) — Kotlin idioms, domain-layer purity, TDD/testing discipline, Ktor/Exposed/Koin conventions, build hygiene, and money-math correctness. A stricter, project-specific sibling to the generic /code-review, informed by this project's own audits (ADR-0005/0009/0015/0017/0019/0020) rather than generic advice. Use before merging any core/server change, and always for anything in ADR-0017's human-review lanes (money math, auth, deletion, audit log). For web/ (Next.js/React/TypeScript) changes, use web-expert-review instead.
 ---
 
 # Kotlin Expert Review
@@ -18,11 +18,12 @@ A project-specific correctness/quality gate for AfnaiHisab's Kotlin and Kotlin M
 ## How to review
 
 1. Read `docs/EXPERT_GUIDELINES.md` in full (7 sections: Kotlin idioms, domain-layer design, testing discipline, Ktor/backend, build/tooling hygiene, money/financial correctness, git/process).
-2. Identify the diff or file set in scope (current uncommitted changes, or a named branch/PR if the invocation specifies one).
-3. Read every changed file completely — not a diff-only skim — since several guidelines (KDoc staleness, layer-boundary violations, missing tests for an AC) only show up by reading the whole function/file, not the changed lines in isolation.
-4. Check each changed file against every applicable section of `docs/EXPERT_GUIDELINES.md`. Skip sections that don't apply (e.g. §4 Ktor/backend has nothing to say about a pure `core` domain file).
-5. For anything touching money math, balances, settlements, auth, or deletion: explicitly confirm the diff still matches its `docs/specs/*.md` acceptance criteria one by one, not just "looks reasonable."
-6. Verify build health as part of the review, not just code reading — run (with `JAVA_HOME` set to the project's Homebrew `openjdk@17`, per `docs/TOOLING.md`):
+2. If the diff touches `server`'s repository/persistence layer (anything importing Exposed), also read `docs/guidelines/exposed-koin.md` — it covers Exposed 1.x's current API surface specifically, since the package structure changed completely in the 1.0 release and older tutorials/training data reference paths that no longer compile.
+3. Identify the diff or file set in scope (current uncommitted changes, or a named branch/PR if the invocation specifies one).
+4. Read every changed file completely — not a diff-only skim — since several guidelines (KDoc staleness, layer-boundary violations, missing tests for an AC) only show up by reading the whole function/file, not the changed lines in isolation.
+5. Check each changed file against every applicable section of `docs/EXPERT_GUIDELINES.md` (and `docs/guidelines/exposed-koin.md` where relevant). Skip sections that don't apply (e.g. §4 Ktor/backend has nothing to say about a pure `core` domain file).
+6. For anything touching money math, balances, settlements, auth, or deletion: explicitly confirm the diff still matches its `docs/specs/*.md` acceptance criteria one by one, not just "looks reasonable."
+7. Verify build health as part of the review, not just code reading — run (with `JAVA_HOME` set to the project's Homebrew `openjdk@17`, per `docs/TOOLING.md`):
    ```
    ./gradlew ktlintCheck detekt --no-daemon
    ./gradlew :core:jvmTest :server:test --no-daemon

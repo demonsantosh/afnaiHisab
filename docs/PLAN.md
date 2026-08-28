@@ -33,6 +33,7 @@
 | ADR-0017 | Git/commit hygiene, enforced CI test gate, dependency version pinning, and named human-review-required lanes (auth, money math, deletion, audit log) |
 | ADR-0018 | Free staging environment (Koyeb + Neon + Vercel Hobby) for multi-user/mobile testing before production, with an explicit promotion gate |
 | ADR-0019 | Tooling: JDK 17, Flyway migrations, ktlint, npm, Vitest+RTL+Playwright, Swift Package Manager, GitHub + GitHub Actions |
+| ADR-0020 | Web stays on client-side `lib/api.ts` for reads and writes (no Server Actions calling Ktor) — `useActionState` for form UX only |
 
 Full technical rationale: `docs/ARCHITECTURE.md`. Feature scope: `docs/FEATURES.md`. Repo-root agent instructions: `AGENTS.md`. Tool inventory: `docs/TOOLING.md`.
 
