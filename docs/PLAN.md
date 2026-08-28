@@ -39,8 +39,12 @@
 | ADR-0023 | Idempotency keys required on mutating financial endpoints — a retried request never creates a duplicate expense/settlement |
 | ADR-0024 | Ledger-membership authorization is an explicit, enforced, human-review-required rule on every ledger-scoped route |
 | ADR-0025 | Backup/DR: don't rely solely on the hosting provider's default retention (Neon's free tier is only 6h PITR) — periodic independent export required |
+| ADR-0026 | Operational limits: pagination page-size cap, request body size limit, timeouts, graceful shutdown on SIGTERM |
+| ADR-0027 | All timestamps UTC internally (`Instant`); localization is a client-only display concern, never server-side |
+| ADR-0028 | API v1 stays additive-only, forever, once mobile clients exist — a breaking change requires v2, not a v1 mutation |
+| ADR-0029 | Periodic data-integrity reconciliation (split-sums, per-ledger balance-nets-to-zero) — defense in depth independent of `core`'s write-path validation |
 
-System-design review (2026-08-28): non-functional requirements, idempotency, authorization, and backup/DR were the four real gaps found; the append-only/derive-on-read balance design (`docs/PLAN.md` §3) was validated as race-condition-safe by construction, not by locking.
+System-design review (2026-08-28, two passes): first pass found non-functional requirements, idempotency, authorization, and backup/DR. A deeper second pass found operational limits/timeouts, timezone handling, multi-client API compatibility, and data-integrity reconciliation as defense-in-depth. The append-only/derive-on-read balance design (`docs/PLAN.md` §3) was validated as race-condition-safe by construction, not by locking, in both passes.
 
 Full technical rationale: `docs/ARCHITECTURE.md`. Feature scope: `docs/FEATURES.md`. Repo-root agent instructions: `AGENTS.md`. Tool inventory: `docs/TOOLING.md`.
 
@@ -112,7 +116,9 @@ afnaihisab/
 - Real multi-user test on staging: at least two people using a shared ledger concurrently, not just solo testing (ADR-0018 promotion-gate criterion #2)
 - Production deploy target: still deliberately TBD — decided later against ADR-0018's promotion gate, not now
 - Unit tests on `core`'s domain layer — highest-leverage test surface, protects backend and every future mobile client
-- **Done when**: app is reachable on the staging URL (not just localhost), split/balance/settle-up math has test coverage, the Phase 2 security checklist (ADR-0013) is met, and at least one real two-person concurrent test has happened on staging.
+- Operational limits wired per ADR-0026 (pagination cap, request body limit, timeouts, graceful shutdown); idempotency keys (ADR-0023) and ledger-authorization checks (ADR-0024) on every route
+- At least one true end-to-end test: create an expense via the real HTTP API, then query balances via the real HTTP API, asserting the correct result — not just per-layer unit tests. Nothing this integrated exists yet; this is a real, currently-open gap, not a formality.
+- **Done when**: app is reachable on the staging URL (not just localhost), split/balance/settle-up math has test coverage (including the end-to-end test above), the Phase 2 security checklist (ADR-0013) is met, and at least one real two-person concurrent test has happened on staging.
 
 ### Phase 3 — KMP shared module → Android
 - `core`'s data layer becomes real multiplatform (expect/actual, ktor-client networking, MockEngine-tested per ADR-0009)

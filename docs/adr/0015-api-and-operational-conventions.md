@@ -15,6 +15,7 @@ A documentation review surfaced several operational concerns with no owner anywh
 - **Error response format**: a single JSON envelope (`{ "error": { "code": "...", "message": "..." } }`) across all endpoints from Phase 1 — every client (web now, mobile later) parses errors one way.
 - **CORS**: explicit allow-list, never a wildcard. Phase 0/1 local dev: `http://localhost:3000` (or whatever Next.js's dev port is) allowed on `server`. Phase 2: the deployed web origin only.
 - **Secrets management**: `.env` (gitignored) for local dev — JWT signing key, DB credentials, OAuth client secret. Phase 2 deploy uses whatever secret store the chosen hosting target provides (decided alongside the deploy target itself) — never hardcoded, never committed, in either environment.
+- **Secrets rotation** (added 2026-08-28, deeper system-design pass): if the JWT signing key is ever suspected compromised, rotating it invalidates every existing access/refresh token session-wide — an intentional, documented "break glass" procedure, not an automated schedule (no evidence yet that scheduled rotation adds value at this project's scale). The procedure itself (generate new key, deploy, all sessions re-authenticate) isn't written up in detail now — this ADR states that a rotation path must exist and be exercisable, not the exact runbook.
 - **Rate limiting**: basic per-IP/per-user limiting on auth endpoints (login, refresh) from Phase 2, via Ktor's rate-limiting plugin — the obvious abuse target once the app is reachable outside localhost.
 
 ## Consequences

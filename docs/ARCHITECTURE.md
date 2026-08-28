@@ -1,6 +1,6 @@
 # Architecture — AfnaiHisab
 
-Technical reference consolidating ADR-0001 through ADR-0025. Read `docs/PLAN.md` for phases/roadmap, `docs/FEATURES.md` for scope, `AGENTS.md` for the repo-root agent contract, `docs/TOOLING.md` for the concrete tool inventory, and `docs/EXPERT_GUIDELINES.md` plus `docs/guidelines/*.md` (tool-specific: Exposed/Koin, Next.js/React/TypeScript) for the coding standard itself (enforced by the `kotlin-expert-review` and `web-expert-review` skills); this doc is "how it's actually built."
+Technical reference consolidating ADR-0001 through ADR-0029. Read `docs/PLAN.md` for phases/roadmap, `docs/FEATURES.md` for scope, `AGENTS.md` for the repo-root agent contract, `docs/TOOLING.md` for the concrete tool inventory, and `docs/EXPERT_GUIDELINES.md` plus `docs/guidelines/*.md` (tool-specific: Exposed/Koin, Next.js/React/TypeScript) for the coding standard itself (enforced by the `kotlin-expert-review` and `web-expert-review` skills); this doc is "how it's actually built."
 
 ## Module layout (ADR-0001, amended)
 
@@ -86,11 +86,16 @@ Point deliberately left open at Phase 4: Android (Material) and iOS (Human Inter
 - **Idempotency**: every mutating financial endpoint requires an `Idempotency-Key` header; a repeated key returns the original stored response rather than reprocessing (ADR-0023) — check-and-insert as one atomic transaction (`docs/guidelines/exposed-koin.md`).
 - **Authorization**: every ledger-scoped route verifies the requester's `Membership` in the target ledger before acting (ADR-0024) — a human-review-required check (ADR-0017), not assumed correct by default.
 
-## System design (ADR-0022, ADR-0025)
+## System design (ADR-0022, ADR-0025 through ADR-0029)
 
 - **Non-functional requirements** (ADR-0022): small-scale (tens to low hundreds of users), best-effort availability, **strong consistency within a ledger** (the reason this stays a single Postgres instance with ACID transactions rather than anything eventually-consistent), interactive-latency only.
+- **Accepted risk**: provider outages (Koyeb, Neon, Vercel) are not mitigated by multi-region/multi-provider redundancy — this follows directly from ADR-0022's best-effort availability target, not an oversight. Revisit only if that NFR changes.
 - **Concurrency safety, validated**: the append-only + derive-on-read balance design (`docs/PLAN.md` §3, `BalanceCalculator.kt`) means there is no read-modify-write race on balances — concurrent expense/settlement creation is safe by construction, not by locking, since nothing ever overwrites a shared mutable "current balance" field.
 - **Backup/DR** (ADR-0025): don't rely solely on the hosting provider's default retention — Neon's free tier (ADR-0018) is only a 6-hour point-in-time-recovery window, evaluated for uptime/cost but not durability. A periodic independent `pg_dump` export is required once staging holds any data worth not losing.
+- **Operational limits** (ADR-0026): pagination capped (default 50, max 200), request body size limited, HTTP/DB/connection-acquisition timeouts set explicitly (not left unconfigured), graceful shutdown on `SIGTERM`.
+- **Timezone handling** (ADR-0027): every stored/transmitted timestamp is UTC (`Instant`); localization is display-only, client-side, never server-side.
+- **API compatibility** (ADR-0028): `/api/v1` is additive-only once mobile clients exist (Phase 3+) — a breaking change requires `/api/v2` with a deprecation window, decided concretely when it's actually needed, not speculated now.
+- **Data-integrity reconciliation** (ADR-0029): a periodic check (manual or scheduled) that split-sums match expense amounts and every ledger's member balances net to zero — defense in depth independent of `core`'s write-path validation, catching a bypass (bad migration, manual DB fix, future admin tool), not a bug in `core` itself.
 
 ## Testing strategy (ADR-0009)
 
