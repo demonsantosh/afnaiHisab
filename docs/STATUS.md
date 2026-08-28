@@ -3,7 +3,7 @@
 Last updated: 2026-08-28
 
 ## Current phase
-**Phase 1 — Web MVP, first feature complete in `core`, everything on `main`.** Expense/split/balance/settlement (`docs/specs/expense-split-balance.md`, 13 ACs) is fully implemented, tested, independently reviewed, and approved by the user — money-math human-review lane (ADR-0017) satisfied. Not yet wired into `server` (no routes/repositories exist for it). Next real step: either wire this feature into `server` + `web`, or continue with more `core` domain logic first — not yet decided.
+**Phase 1 — Web MVP, server layer wired up and merged to `main`.** `core`'s expense/split/balance/settlement logic (`docs/specs/expense-split-balance.md`, 13 ACs) is now live behind 6 HTTP endpoints (`docs/specs/expense-split-balance-api.md`), and registration/login (`docs/specs/registration-login.md`) provides the JWTs those endpoints require. Both are ADR-0017 human-review lanes; both reviewed and merged this session. Next real step: a minimal `web` UI — the only thing left for Phase 1's actual "done when" criterion (two local users creating a shared ledger, adding expenses, seeing correct balances).
 
 ## Repo / branches
 - Remote: https://github.com/demonsantosh/afnaiHisab — single `main` branch, everything merged. Per ADR-0017's 2026-08-28 amendment, PRs are optional ceremony for solo development (confirmed: no second developer currently) — direct merge after review + a passing CI run is the standing process now. The three earlier feature branches (Phase 0 scaffolding, the spec, the impl) were fast-forward-merged and deleted, both locally and on origin.
@@ -21,7 +21,7 @@ Last updated: 2026-08-28
 - **Phase 1's first feature — expense/split/balance/settlement — fully implemented in `core`**: `createEqualSplitExpense` (largest-remainder rounding), `calculateBalances` (derived, never stored), `createSettlement`/`recordSettlement` (every settlement reports before/after balance context per the user's explicit clarity requirement). TDD red phase (15 tests) → green phase, independently re-verified from the actual JUnit XML (not a self-report) → user-approved for merge.
 
 ## Verified (current)
-`./gradlew ktlintCheck detekt --no-daemon` clean · `./gradlew :core:jvmTest` 15/15 **green** · `./gradlew :server:test` 8/8 green · configuration cache stores/reuses cleanly.
+`./gradlew ktlintCheck detekt --no-daemon` clean · `./gradlew build` succeeds · `./gradlew :core:jvmTest --rerun-tasks` **21/21 green** · `./gradlew :server:test --rerun-tasks` **57/57 green** (both counts re-verified from actual JUnit XML output, not a self-report) · configuration cache stores/reuses cleanly.
 
 ## System-design review (2026-08-28, two passes)
 **First pass**, four real gaps found and fixed as ADRs: **ADR-0022** (non-functional requirements never stated — now explicit: small-scale, best-effort availability, strong consistency within a ledger), **ADR-0023** (idempotency keys on mutating endpoints — a naive client retry would otherwise duplicate an expense/settlement), **ADR-0024** (ledger-membership authorization as an explicit, human-review-required rule — closes a potential IDOR gap), **ADR-0025** (backup/DR — Neon's free tier is only 6h PITR, never evaluated when chosen for uptime/cost alone).
@@ -45,18 +45,26 @@ User asked directly whether to decide iOS's UI framework now instead of waiting 
 User asked directly about Lifecycle/Resources/Multiplatform ViewModel/Navigation — audited and confirmed all four were genuinely undecided (navigation had zero library choice beyond an MVI `Effect` signal; mobile resources/i18n had zero coverage despite ADR-0031 being web-only; ViewModel was cited as an enabling fact for ADR-0010 but never explicitly committed to). Researched and decided: **ADR-0033** (`androidx.navigation`, official/stable since CMP 1.10.0 — not Decompose, whose component philosophy conflicts with ADR-0010's already-rejected framework commitment, and not Voyager, now unnecessary given the official option stabilized), **ADR-0034** (`compose.resources` — the mobile counterpart to ADR-0031's web-only i18n decision), **ADR-0035** (MVI containers extend `androidx.lifecycle.ViewModel`/`viewModelScope`, refining not replacing ADR-0010 — also resolves "Lifecycle" as a side effect, no separate ADR needed). Nice validation surfaced: ADR-0032 (Compose Multiplatform UI on iOS) turns out to also avoid a real SwiftUI rough edge — no Flow-to-Swift bridging layer needed, since both platforms stay in Kotlin. Also fixed two more stale "iOS undecided" references this surfaced, in ADR-0010 and ADR-0021 themselves (not just derived docs) — the drift-hunting discipline `docs/INDEX.md` exists for, applied again.
 
 ## Not started
-- `server` routes/repositories for this feature (Exposed table objects don't exist yet — see `docs/guidelines/exposed-koin.md` before writing them, including the idempotency-key, multi-row-transaction-atomicity, and operational-limits requirements).
+- Any `web/` UI — nothing consumes the now-live server API yet.
+- A real `POST /api/v1/auth/refresh` route — `RefreshSessionRepository`'s rotation/reuse-detection logic exists and is tested, but no route calls it yet.
 - The periodic Postgres backup export (ADR-0025) and data-integrity reconciliation query (ADR-0029) — both process/discipline items, not yet actually set up, low urgency while staging holds only test data.
-- The true end-to-end (real-HTTP-API) test now required by Phase 2's "done when" criteria — nothing this integrated exists yet, only per-layer unit/integration tests.
-- Any `web/` UI.
 - CI has never actually run against `main` yet (first push to trigger it happens whenever the next push lands — nothing blocking this now that everything's on `main` directly).
 - Docker/Postgres still not installed — H2 carries local dev, as planned.
 - `Ledger.defaultCurrency`'s real default value — still an open, unresolved question.
-- ADR-0007's "simplify debts" algorithm, exact/percentage/weighted/itemized splits — all explicitly Phase 2, not this feature.
+- ADR-0007's "simplify debts" algorithm, exact/percentage/weighted/itemized splits, edit/delete, audit log — all explicitly out of scope for the current API, Phase 2 work.
 - Compose Multiplatform UI's actual Gradle setup for Android (ADR-0021) — a Phase 3 concern, not urgent now, but flagged so it isn't discovered mid-implementation.
 
+## Registration/login + ledger/expense API merged (2026-08-28)
+Two pieces built in parallel — registration/login (`docs/specs/registration-login.md`, in an isolated git worktree since it touched the same files the API work was live-editing) and the 6-endpoint ledger/expense/balance/settlement API (`docs/specs/expense-split-balance-api.md`, in the main tree) — were reconciled by hand and merged to `main` as one commit. Both are ADR-0017 human-review lanes (auth/tokens, money math, ledger authorization, idempotency); the user reviewed the plan and explicitly approved before merge.
+
+Real gaps found and fixed during reconciliation, not just file-naming conflicts:
+- **Cross-tenant idempotency-key leak** (self-review finding): keys were scoped by `idempotency_key` alone; a colliding/reused key from a *different* user would return that user's cached response verbatim, most exploitable on `POST /ledgers` (no membership gate). Fixed: composite `(userId, idempotencyKey)` scoping, `userId` always sourced from the verified JWT, never the request body.
+- **Missing JWT audience claim**: the ledger API's `configureAuthentication` verifier required an `audience` claim; the auth branch's `JwtService` never set one. A real login-issued token would have failed verification against every protected route. Fixed: unified `JwtConfig` (one shape, six fields), audience claim added to token issuance.
+- **Missing token-type check**: issued tokens carry a `type` claim (`ACCESS`/`REFRESH`) that nothing was checking — a refresh token could pass as a bearer access token. Fixed: `configureAuthentication`'s `validate {}` now rejects anything but `type=ACCESS`.
+- Two independent `UsersTable`/`UserRepository` definitions, and a `V3` migration filename collision (`idempotency_keys` vs. `refresh_sessions`) — consolidated to one and renumbered to V4 respectively.
+
 ## Next concrete step
-Not yet decided: wire expense/split/balance/settlement into `server` (repositories per `docs/guidelines/exposed-koin.md`, routes) next, or write another `core` feature first.
+Build a minimal `web` UI: local auth (register/login), create a shared ledger, add an expense, view balances — the actual Phase 1 "done when" criterion.
 
 ## Update discipline
 Update this file at the end of every work session — phase changes, milestones hit, or scope changes. Prefer rewriting stale sections over appending to them.
