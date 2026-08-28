@@ -73,9 +73,9 @@ Two features need real `expect`/`actual` boundaries — the concrete case of KMP
 
 Push delivery also requires `server/` to store a device-token-to-platform mapping per session and route to the correct provider — Phase 3 scope, backend and mobile both.
 
-## Platform look-and-feel (flagged, not yet decided)
+## Platform look-and-feel (ADR-0032 — decided, not deferred)
 
-Point deliberately left open at Phase 4: Android (Material) and iOS (Human Interface Guidelines) have different UX conventions. If Phase 4 picks Compose Multiplatform UI for iOS (ADR-0003/PLAN.md leave this open), per-platform theming needs deliberate design work, not a single shared theme assumed to look native on both. If Phase 4 picks SwiftUI instead, this is moot — native UI is native by construction. **Decide explicitly when Phase 4 starts; don't let this default silently.**
+iOS uses Compose Multiplatform UI (ADR-0032, decided early — Compose Multiplatform for iOS reached Stable in 2025, the maturity-based reason to wait no longer applies). Consequence, not a moot point: Android (Material) and iOS (Human Interface Guidelines) have different UX conventions, and Compose Multiplatform renders via Skia, not native UIKit — it does **not** inherit iOS's HIG styling automatically the way SwiftUI would have. Per-platform theming is deliberate, permanent design work this project owns, not a gap that tooling maturity closes over time. Same for accessibility (VoiceOver) — supported well by current tooling, but requires explicit semantic mapping per screen, not automatic inheritance.
 
 ## API conventions (ADR-0015)
 

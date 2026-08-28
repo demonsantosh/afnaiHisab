@@ -45,6 +45,7 @@
 | ADR-0029 | Periodic data-integrity reconciliation (split-sums, per-ledger balance-nets-to-zero) — defense in depth independent of `core`'s write-path validation |
 | ADR-0030 | Account lifecycle: Argon2id password hashing, length-based strength policy, non-blocking email verification, time-limited single-use password reset |
 | ADR-0031 | i18n architecture decided now (`next-intl`, every string wrapped from Phase 1) — no translations committed yet, just kept cheap to add later |
+| ADR-0032 | iOS uses Compose Multiplatform UI (decided early, not deferred to Phase 4) — same framework as Android; HIG-fidelity and accessibility are explicit, owned design work, not automatic |
 
 System-design review (2026-08-28, two passes): first pass found non-functional requirements, idempotency, authorization, and backup/DR. A deeper second pass found operational limits/timeouts, timezone handling, multi-client API compatibility, and data-integrity reconciliation as defense-in-depth. The append-only/derive-on-read balance design (`docs/PLAN.md` §3) was validated as race-condition-safe by construction, not by locking, in both passes.
 
@@ -134,7 +135,7 @@ afnaihisab/
 - **Done when**: Android app hits the staging backend (not just localhost), sharing domain/data code rather than reimplementing it, and has been used by a real second tester alongside web.
 
 ### Phase 4 — iOS
-- Compile `core` to a Kotlin/Native framework; `app/iosApp` in SwiftUI or Compose Multiplatform UI — **decide explicitly at Phase 4 start** (see ARCHITECTURE.md "Platform look-and-feel"), don't default silently
+- Compile `core` to a Kotlin/Native framework; `app/iosApp` in **Compose Multiplatform UI** (ADR-0032, decided early — same framework as Android, ADR-0021) — budget explicit design time for HIG-fidelity theming and per-screen accessibility semantics (ARCHITECTURE.md "Platform look-and-feel"), since neither is automatic the way SwiftUI would have been
 - Reconcile platform gaps surfaced in Phase 3; debug builds against staging same as Android (ADR-0018)
 - **Done when**: iOS functionally matches Android against the same staging backend, and ADR-0018's full promotion gate is re-checked before any production decision is made.
 

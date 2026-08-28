@@ -13,7 +13,7 @@ The single source of truth for "how many ADRs / what are they" — nothing else 
 | [0007: Greedy heap-based debt simplification](0007-settle-up-algorithm.md) | Accepted |
 | [0008: Short-lived JWT access token + rotating refresh token](0008-jwt-auth-refresh-rotation.md) | Accepted |
 | [0009: kotlin.test in commonTest as the primary test surface](0009-testing-strategy.md) | Accepted |
-| [0010: Lightweight, hand-rolled MVI for the shared presentation layer](0010-mvi-presentation-layer.md) | Accepted |
+| [0010: Lightweight, hand-rolled MVI for the shared presentation layer](0010-mvi-presentation-layer.md) | Accepted, amended 2026-08-28 (stale cross-reference to ADR-0032 fixed) |
 | [0011: Platform-specific APIs via expect/actual](0011-platform-specific-apis.md) | Accepted |
 | [0012: Visible audit log for shared-ledger mutations](0012-audit-log-for-mutations.md) | Accepted, starts Phase 2. Amended 2026-08-28 (scope widened to Membership) |
 | [0013: Security hardening baseline](0013-security-hardening-baseline.md) | Accepted |
@@ -35,6 +35,7 @@ The single source of truth for "how many ADRs / what are they" — nothing else 
 | [0029: Periodic data-integrity reconciliation](0029-data-integrity-reconciliation.md) | Accepted |
 | [0030: Account lifecycle — password hashing, verification, reset](0030-account-lifecycle.md) | Accepted |
 | [0031: i18n architecture decided now, translations later](0031-internationalization.md) | Accepted |
+| [0032: iOS uses Compose Multiplatform UI, decided early](0032-ios-compose-multiplatform.md) | Accepted |
 
 ## Human-review-required lanes (canonical list — ADR-0017, amended by ADR-0023, ADR-0024)
 
