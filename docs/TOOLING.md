@@ -88,7 +88,9 @@ keytool -importcert -noprompt -trustcacerts -alias gme-internal-root-ca \
 keytool -importcert -noprompt -trustcacerts -alias gme-internal-ca \
   -file <intermediate-cert.pem> -keystore "$JDK_HOME/lib/security/cacerts" -storepass changeit
 ```
-Certs extracted via `openssl s_client -connect repo.maven.apache.org:443 -showcerts`. Already patched: Corretto 17.0.9 and Homebrew `openjdk@17` 17.0.15.
+Certs extracted via `openssl s_client -connect repo.maven.apache.org:443 -showcerts`.
+
+**Recurred 2026-08-28** — a background agent's build spawned a Kotlin compile daemon under a *different*, still-unpatched JDK (OpenJDK 20.0.2) and hit the identical stall, proving that patching only the JDKs a human happens to invoke isn't enough — any JDK Gradle/Kotlin's toolchain resolution reaches for needs the cert, including ones reached indirectly (a Kotlin daemon, a Gradle-auto-provisioned toolchain). **All JDKs discoverable on this machine are now patched** (Corretto 17.0.9, Corretto 18.0.2, Oracle-installed 17.0.2 where filesystem permissions allow, OpenJDK 20.0.2, Homebrew `openjdk@17` 17.0.15, Homebrew `openjdk` 24.0.1) — not just the two originally designated for project use. If a *new* JDK ever gets installed on this machine, it needs the same two `keytool` commands run against it before it's trustworthy for this project.
 
 **Project JDK going forward: Homebrew `openjdk@17` (17.0.15)**, not Corretto 17.0.9 — superseding ADR-0019's original pick. Reason: Corretto 17.0.9 was installed manually in Nov 2023 and never updated (stale `cacerts`, three years old, is exactly what triggers this class of problem); Homebrew's build gets refreshed via `brew upgrade`, which is a real defense against this recurring. Set explicitly per shell/IDE:
 ```

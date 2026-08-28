@@ -4,7 +4,16 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.kover)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
     application
+}
+
+// Complements ktlint (formatting) with complexity/smell/bug-pattern rules (ADR-0019 amendment).
+// The plugin wires `detekt` into `check`, so `./gradlew build` and CI fail on a violation exactly
+// as they already do for ktlint and the tests.
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
 }
 
 kotlin {

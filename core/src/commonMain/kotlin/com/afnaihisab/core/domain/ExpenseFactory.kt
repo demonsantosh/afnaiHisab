@@ -65,7 +65,13 @@ data class ExpenseWithSplits(
  *   same order as [members] — injected (rather than calling `Uuid.random()` internally) so tests
  *   can assert on exact ids with deterministic input, per this project's ban on non-deterministic
  *   tests (`docs/adr/0009-testing-strategy.md`).
+ *
+ * `@Suppress`: `UnusedParameter` because the body is a deliberate red-phase `TODO()` (ADR-0009) —
+ * the signature is the contract the implementing pass is written against. `LongParameterList`
+ * because an expense genuinely carries this much data, and `newId` is injected rather than called
+ * internally so tests stay deterministic; every call site uses named arguments.
  */
+@Suppress("UnusedParameter", "LongParameterList")
 fun createEqualSplitExpense(
     ledger: Ledger,
     members: List<Membership>,

@@ -33,7 +33,11 @@ package com.afnaihisab.core.domain
  * @param splits every [Split] belonging to an expense in [expenses] (from any member, not just
  *   `members` — callers are expected to pass a consistent, already-filtered-to-this-ledger set).
  * @param settlements every [Settlement] recorded against this ledger.
+ *
+ * `@Suppress("UnusedParameter")`: unused only because the body is a deliberate red-phase `TODO()`
+ * (ADR-0009) — the signature above is the contract the implementing pass is written against.
  */
+@Suppress("UnusedParameter")
 fun calculateBalances(
     members: List<Membership>,
     expenses: List<Expense>,

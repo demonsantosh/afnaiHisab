@@ -27,8 +27,8 @@ class SettlementValidationTest {
                 ledgerId = ledgerId,
                 fromMembershipId = fromMember.id,
                 toMembershipId = toMember.id,
-                amount = 500L,
-                currency = "USD",
+                amount = MinorUnits(500L),
+                currency = CurrencyCode("USD"),
                 createdAt = FIXED_CREATED_AT,
                 id = uuid(200),
             )
@@ -40,8 +40,8 @@ class SettlementValidationTest {
         assertEquals(ledgerId, settlement.ledgerId)
         assertEquals(fromMember.id, settlement.fromMembershipId)
         assertEquals(toMember.id, settlement.toMembershipId)
-        assertEquals(500L, settlement.amount)
-        assertEquals("USD", settlement.currency)
+        assertEquals(MinorUnits(500L), settlement.amount)
+        assertEquals(CurrencyCode("USD"), settlement.currency)
 
         // AC-6/AC-8: the created settlement must actually move subsequent balance calculations.
         // No expenses at all: without the settlement both members are 0; with it, `from` is
@@ -49,8 +49,8 @@ class SettlementValidationTest {
         // debited by the same amount.
         val balances = calculateBalances(members = members, expenses = emptyList(), splits = emptyList(), settlements = listOf(settlement))
         val byMembership = balances.associateBy { it.membershipId }
-        assertEquals(500L, byMembership.getValue(fromMember.id).netBalance)
-        assertEquals(-500L, byMembership.getValue(toMember.id).netBalance)
+        assertEquals(MinorUnits(500L), byMembership.getValue(fromMember.id).netBalance)
+        assertEquals(MinorUnits(-500L), byMembership.getValue(toMember.id).netBalance)
     }
 
     @Test
@@ -60,8 +60,8 @@ class SettlementValidationTest {
                 ledgerId = ledgerId,
                 fromMembershipId = fromMember.id,
                 toMembershipId = fromMember.id,
-                amount = 500L,
-                currency = "USD",
+                amount = MinorUnits(500L),
+                currency = CurrencyCode("USD"),
                 createdAt = FIXED_CREATED_AT,
             )
 
@@ -74,14 +74,14 @@ class SettlementValidationTest {
 
     @Test
     fun `AC-10 rejects a non-positive settlement amount`() {
-        for (badAmount in listOf(0L, -1L, -500L)) {
+        for (badAmount in listOf(MinorUnits(0L), MinorUnits(-1L), MinorUnits(-500L))) {
             val result =
                 createSettlement(
                     ledgerId = ledgerId,
                     fromMembershipId = fromMember.id,
                     toMembershipId = toMember.id,
                     amount = badAmount,
-                    currency = "USD",
+                    currency = CurrencyCode("USD"),
                     createdAt = FIXED_CREATED_AT,
                 )
 

@@ -35,9 +35,11 @@ presentation. When a rule appears to need writing twice, that is the signal it b
   than hand-fixing.
 - Ids are `kotlin.uuid.Uuid` (UUIDv7 in practice — time-sortable, so an id doubles as a pagination
   cursor). Both modules opt in to `kotlin.uuid.ExperimentalUuidApi` in their build script.
-- **Money is `MinorUnits` (`typealias` for `Long`), always.** Never `Double`, `Float`, or
-  `BigDecimal` on a money field. This is the single most important type rule in the repo
-  (`docs/domain-model.md`).
+- **Money is `MinorUnits` (a `@JvmInline value class` over `Long`), always** — and a currency is
+  `CurrencyCode` (over `String`), never a bare `String`. Never `Double`, `Float`, or `BigDecimal`
+  on a money field. Both compile away to the underlying primitive (zero runtime cost) while the
+  compiler rejects a stray `Long`/`String` at a money/currency parameter. This is the single most
+  important type rule in the repo (`docs/domain-model.md`).
 - SQL: lowercase snake_case, plural tables (`expenses`), `ix_`/`ux_`/`ck_` prefixes for
   index/unique/check constraints.
 - TypeScript: `web/lib/api.ts` is the only place that knows the backend's URL and error shape;

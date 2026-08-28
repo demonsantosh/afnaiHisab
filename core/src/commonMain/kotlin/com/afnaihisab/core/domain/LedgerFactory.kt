@@ -1,3 +1,9 @@
+// This file is named after the factory functions it exists for (`createLedger`, `addMember`), not
+// after the incidental `LedgerCreationResult` below — detekt's one-class-per-matching-filename rule
+// doesn't fit a function-first file (the sibling `*Factory.kt` files declare two types each, so
+// only this one trips it).
+@file:Suppress("MatchingDeclarationName")
+
 package com.afnaihisab.core.domain
 
 import kotlin.time.Instant
@@ -24,7 +30,11 @@ data class LedgerCreationResult(
  * @param ledgerId injected id for the new [Ledger] (not `Uuid.random()` internally) so tests stay
  *   deterministic.
  * @param ownerMembershipId injected id for the owner [Membership].
+ *
+ * `@Suppress`: unused only because the body is a deliberate red-phase `TODO()` (ADR-0009); the two
+ * id parameters are injected rather than generated internally so tests stay deterministic.
  */
+@Suppress("UnusedParameter", "LongParameterList")
 fun createLedger(
     name: String,
     defaultCurrency: CurrencyCode,
@@ -51,7 +61,11 @@ fun createLedger(
  *
  * @param membershipId injected id for the new [Membership] (not `Uuid.random()` internally) so
  *   tests stay deterministic.
+ *
+ * `@Suppress("UnusedParameter")`: unused only because the body is a deliberate red-phase `TODO()`
+ * (ADR-0009).
  */
+@Suppress("UnusedParameter")
 fun addMember(
     ledger: Ledger,
     newUserId: Uuid,

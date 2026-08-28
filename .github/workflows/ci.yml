@@ -1,7 +1,7 @@
 name: CI
 
 # ADR-0017 makes this a *gate*, not a status report: `./gradlew build` runs `commonTest` +
-# `server` integration tests and ktlint, and a failure fails the job.
+# `server` integration tests, ktlint and detekt, and a failure in any of them fails the job.
 #
 # One manual step is required on GitHub and cannot be expressed in this file: in
 # Settings -> Branches -> branch protection for `main`, enable "Require status checks to pass
@@ -40,7 +40,8 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # `build` = compile + ktlintCheck + test, for both `core` and `server`.
+      # `build` = compile + ktlintCheck + detekt + test, for both `core` and `server` — both lint
+      # tools hang off `check`, so there is no separate step to keep in sync with this one.
       - name: Build and test
         run: ./gradlew build --stacktrace
 

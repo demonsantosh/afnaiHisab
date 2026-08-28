@@ -6,6 +6,8 @@ Detailed fields/types/invariants for the entities listed in `docs/PLAN.md` §3. 
 
 Every money field (`Expense.amount`, `Split.amount`, `Settlement.amount`) is a **`Long` in minor units** (e.g. cents for USD — the currency code determines the minor-unit exponent, most currencies 2, some like JPY 0). Never `Float`, `Double`, or an implicit-scale decimal. This makes FEATURES.md §(a)'s rounding-remainder rule (largest-remainder method) exact by construction — integer arithmetic has no representation error to reason about. This is the single most important correctness rule in the whole domain model; get it right in `core`'s type definitions before anything else is built on top.
 
+In `core` this is expressed as `MinorUnits`, a `@JvmInline value class` wrapping that `Long` (and `CurrencyCode`, wrapping the ISO 4217 `String`) — `core/src/commonMain/.../domain/Money.kt`. Both erase to the underlying primitive at runtime, so the storage types in the tables below are unchanged; the wrapper exists so the compiler rejects a split count, a timestamp, or a category name being passed where money or a currency is expected. A future Exposed column mapping must unwrap `.value` explicitly at that boundary.
+
 ## ID strategy
 
 UUIDv7 for every entity's primary key — time-sortable, which makes it a natural cursor for ADR-0015's cursor-based pagination without a separate sequence/timestamp column. Confirmed by a 2026 best-practice audit as the currently-recommended choice over both UUIDv4 (worse index locality) and bare bigint (no natural pagination cursor).

@@ -41,7 +41,12 @@ object SettlementValidationCodes {
  *
  * @param id the settlement's id — injected (not `Uuid.random()` internally) so tests stay
  *   deterministic (`docs/adr/0009-testing-strategy.md`).
+ *
+ * `@Suppress`: `UnusedParameter` because the body is a deliberate red-phase `TODO()` (ADR-0009).
+ * `LongParameterList` because these are exactly the [Settlement] fields plus an injected `id` for
+ * deterministic tests.
  */
+@Suppress("UnusedParameter", "LongParameterList")
 fun createSettlement(
     ledgerId: Uuid,
     fromMembershipId: Uuid,
@@ -95,7 +100,13 @@ data class SettlementRecord(
  * @param members,expenses,splits,existingSettlements the ledger's full current state, as
  *   [calculateBalances] already expects it — [existingSettlements] excludes the settlement being
  *   recorded by this call.
+ *
+ * `@Suppress`: `UnusedParameter` because the body is a deliberate red-phase `TODO()` (ADR-0009).
+ * `LongParameterList` because AC-13 composes [createSettlement] over [calculateBalances], so this
+ * signature is deliberately the union of both — the spec explicitly rejects storing the ledger
+ * state on [Settlement] instead.
  */
+@Suppress("UnusedParameter", "LongParameterList")
 fun recordSettlement(
     members: List<Membership>,
     expenses: List<Expense>,

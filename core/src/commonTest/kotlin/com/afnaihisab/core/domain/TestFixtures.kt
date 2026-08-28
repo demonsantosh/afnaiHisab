@@ -17,7 +17,7 @@ val FIXED_DATE: LocalDate = LocalDate(2026, 1, 15)
 
 fun testLedger(
     id: Uuid = uuid(0),
-    currency: CurrencyCode = "USD",
+    currency: CurrencyCode = CurrencyCode("USD"),
 ): Ledger =
     Ledger(
         id = id,
@@ -51,7 +51,7 @@ fun testExpense(
     ledgerId: Uuid,
     payerMembershipId: Uuid,
     amount: MinorUnits,
-    currency: CurrencyCode = "USD",
+    currency: CurrencyCode = CurrencyCode("USD"),
 ): Expense =
     Expense(
         id = id,
@@ -73,13 +73,15 @@ fun testSplit(
     amount: MinorUnits,
 ): Split = Split(id = id, expenseId = expenseId, membershipId = membershipId, amount = amount)
 
+// Mirrors `Settlement`'s own field list; collapsing it would make the fixtures less explicit.
+@Suppress("LongParameterList")
 fun testSettlement(
     id: Uuid,
     ledgerId: Uuid,
     fromMembershipId: Uuid,
     toMembershipId: Uuid,
     amount: MinorUnits,
-    currency: CurrencyCode = "USD",
+    currency: CurrencyCode = CurrencyCode("USD"),
 ): Settlement =
     Settlement(
         id = id,

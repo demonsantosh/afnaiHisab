@@ -16,7 +16,7 @@ import kotlin.test.assertTrue
  */
 class ExpenseSplittingTest {
     private val ledgerId = uuid(0)
-    private val ledger = testLedger(id = ledgerId, currency = "USD")
+    private val ledger = testLedger(id = ledgerId, currency = CurrencyCode("USD"))
 
     // ---- AC-1: one Split per current member, summing exactly to the expense amount ----
 
@@ -30,8 +30,8 @@ class ExpenseSplittingTest {
                 ledger = ledger,
                 members = members,
                 payerMembershipId = payer.id,
-                amount = 300L,
-                currency = "USD",
+                amount = MinorUnits(300L),
+                currency = CurrencyCode("USD"),
                 category = "food",
                 date = FIXED_DATE,
                 createdAt = FIXED_CREATED_AT,
@@ -43,15 +43,15 @@ class ExpenseSplittingTest {
 
         assertEquals(ledgerId, expense.ledgerId)
         assertEquals(payer.id, expense.payerMembershipId)
-        assertEquals(300L, expense.amount)
-        assertEquals("USD", expense.currency)
+        assertEquals(MinorUnits(300L), expense.amount)
+        assertEquals(CurrencyCode("USD"), expense.currency)
         assertEquals(SplitType.EQUAL, expense.splitType)
         assertEquals(false, expense.isLocked)
 
         assertEquals(members.size, splits.size, "expected exactly one split per current ledger member")
         assertEquals(members.map { it.id }.toSet(), splits.map { it.membershipId }.toSet())
-        assertEquals(300L, splits.sumOf { it.amount }, "splits must sum exactly to the expense amount")
-        assertTrue(splits.all { it.amount == 100L }, "amount divides evenly across 3 members, so every split should be 100")
+        assertEquals(MinorUnits(300L), splits.sumOf { it.amount }, "splits must sum exactly to the expense amount")
+        assertTrue(splits.all { it.amount == MinorUnits(100L) }, "amount divides evenly across 3 members, so every split should be 100")
     }
 
     // ---- AC-2: largest-remainder rounding, ascending-membershipId tiebreak ----
@@ -63,22 +63,22 @@ class ExpenseSplittingTest {
         val amount: MinorUnits,
     ) {
         val base: MinorUnits get() = amount / memberCount
-        val remainder: Int get() = (amount % memberCount).toInt()
+        val remainder: Int get() = (amount % memberCount).value.toInt()
     }
 
     @Test
     fun `AC-2 allocates the leftover minor units to the lowest membershipIds, sum always exact`() {
         val cases =
             listOf(
-                RoundingCase(2, 100L),
-                RoundingCase(2, 101L),
-                RoundingCase(2, 1000L),
-                RoundingCase(3, 100L),
-                RoundingCase(3, 101L),
-                RoundingCase(3, 1000L),
-                RoundingCase(7, 100L),
-                RoundingCase(7, 101L),
-                RoundingCase(7, 1000L),
+                RoundingCase(2, MinorUnits(100L)),
+                RoundingCase(2, MinorUnits(101L)),
+                RoundingCase(2, MinorUnits(1000L)),
+                RoundingCase(3, MinorUnits(100L)),
+                RoundingCase(3, MinorUnits(101L)),
+                RoundingCase(3, MinorUnits(1000L)),
+                RoundingCase(7, MinorUnits(100L)),
+                RoundingCase(7, MinorUnits(101L)),
+                RoundingCase(7, MinorUnits(1000L)),
             )
 
         for (case in cases) {
@@ -91,7 +91,7 @@ class ExpenseSplittingTest {
                     members = members,
                     payerMembershipId = payer.id,
                     amount = case.amount,
-                    currency = "USD",
+                    currency = CurrencyCode("USD"),
                     category = "trip",
                     date = FIXED_DATE,
                     createdAt = FIXED_CREATED_AT,
@@ -117,7 +117,7 @@ class ExpenseSplittingTest {
             val byMembership = splits.associateBy { it.membershipId }
             val sortedMembers = members.sortedBy { it.id }
             sortedMembers.forEachIndexed { index, member ->
-                val expected = if (index < case.remainder) case.base + 1 else case.base
+                val expected = if (index < case.remainder) case.base + MinorUnits(1L) else case.base
                 val actual = byMembership.getValue(member.id).amount
                 assertEquals(
                     expected,
@@ -135,14 +135,14 @@ class ExpenseSplittingTest {
     fun `AC-3 rejects a non-positive amount and creates no records`() {
         val members = testMembers(n = 2, ledgerId = ledgerId)
 
-        for (badAmount in listOf(0L, -1L, -500L)) {
+        for (badAmount in listOf(MinorUnits(0L), MinorUnits(-1L), MinorUnits(-500L))) {
             val result =
                 createEqualSplitExpense(
                     ledger = ledger,
                     members = members,
                     payerMembershipId = members[0].id,
                     amount = badAmount,
-                    currency = "USD",
+                    currency = CurrencyCode("USD"),
                     category = "food",
                     date = FIXED_DATE,
                     createdAt = FIXED_CREATED_AT,
@@ -168,8 +168,8 @@ class ExpenseSplittingTest {
                 ledger = ledger,
                 members = members,
                 payerMembershipId = outsiderMembershipId,
-                amount = 100L,
-                currency = "USD",
+                amount = MinorUnits(100L),
+                currency = CurrencyCode("USD"),
                 category = "food",
                 date = FIXED_DATE,
                 createdAt = FIXED_CREATED_AT,
@@ -190,11 +190,11 @@ class ExpenseSplittingTest {
 
         val result =
             createEqualSplitExpense(
-                ledger = ledger, // defaultCurrency = "USD"
+                ledger = ledger, // defaultCurrency = CurrencyCode("USD")
                 members = members,
                 payerMembershipId = members[0].id,
-                amount = 100L,
-                currency = "NPR",
+                amount = MinorUnits(100L),
+                currency = CurrencyCode("NPR"),
                 category = "food",
                 date = FIXED_DATE,
                 createdAt = FIXED_CREATED_AT,
