@@ -23,6 +23,7 @@ Read this when: you're about to change something and aren't sure what else it to
 | `docs/TOOLING.md` | Tool inventory, versions, environment fixes | New tool adopted, version changed, environment issue found/fixed |
 | `docs/WORKFLOW.md` | Session delegation rules + token-optimization policy | New agent/skill, new human-review lane, delegation strategy change |
 | `AGENTS.md` (repo root) | Cross-tool contract (any AI tool reads this) | Module boundary change, new "never do" rule, new human-review lane |
+| `CLAUDE.md` (repo root) | Claude-Code-specific repo conventions — auto-loaded every session | Module boundary change, new human-review lane, API surface change, phase change |
 | `docs/EXPERT_GUIDELINES.md` + `docs/guidelines/*.md` | Coding standards, general + tool-specific | New idiom/pattern decision, new tool adopted |
 | `docs/specs/*.md` | Per-feature EARS acceptance criteria | Before implementing any feature (ADR-0016) |
 | `docs/adr/*.md` + `docs/adr/README.md` | Decision records + their index | Every new or status-amended decision |
@@ -35,7 +36,7 @@ Read this when: you're about to change something and aren't sure what else it to
 |---|---|
 | A new ADR is added | `docs/adr/README.md` (index); `docs/PLAN.md`'s decisions table; `docs/ARCHITECTURE.md`'s consolidated-range line if it touches architecture; `docs/STATUS.md`'s narrative |
 | An ADR's *status* changes (amended/superseded) | `docs/adr/README.md`'s status column; the amending ADR should say so in its own `## Status` line too (existing convention, e.g. ADR-0001, ADR-0005) |
-| ADR-0017's human-review-lane list changes | `docs/adr/README.md`'s "Human-review-required lanes" section (canonical copy); `AGENTS.md`'s "Never do" list; `docs/WORKFLOW.md`'s human-review-lanes section; `kotlin-expert-review`/`web-expert-review` SKILL.md's "When to use" |
+| ADR-0017's human-review-lane list changes | `docs/adr/README.md`'s "Human-review-required lanes" section (canonical copy); `AGENTS.md`'s "Never do" list; `CLAUDE.md`'s "Things that will bite you" list; `docs/WORKFLOW.md`'s human-review-lanes section; `kotlin-expert-review`/`web-expert-review` SKILL.md's "When to use" |
 | A module gets renamed/restructured (ADR-0001-style) | Every ADR referencing the old name (search, don't assume); `AGENTS.md`; `docs/ARCHITECTURE.md`; `docs/PLAN.md` §4 |
 | A new entity/field/table is added to the domain model | `docs/domain-model.md`; the relevant Flyway migration; `docs/guidelines/exposed-koin.md` if it affects repository patterns |
 | A new tool is adopted or a version changes | `docs/TOOLING.md`; `AGENTS.md`'s build/test commands if user-facing; the relevant guidelines doc |
@@ -45,7 +46,7 @@ Read this when: you're about to change something and aren't sure what else it to
 
 ## Known intentional duplications (double-check these by hand — nothing enforces their sync automatically)
 
-- **Human-review lanes**: canonical source is ADR-0017 + amendments (ADR-0023, ADR-0024). Copies exist in `AGENTS.md` (needs to be self-contained for other AI tools that won't necessarily read `WORKFLOW.md` or the ADR folder) and `docs/WORKFLOW.md`. `kotlin-expert-review`'s SKILL.md deliberately does *not* keep its own copy — its frontmatter description points at its own body instead of enumerating, to remove one of the three copies.
+- **Human-review lanes**: canonical source is ADR-0017 + amendments (ADR-0023, ADR-0024). Copies exist in `AGENTS.md` (needs to be self-contained for other AI tools that won't necessarily read `WORKFLOW.md` or the ADR folder), `CLAUDE.md` (same reason, for Claude Code specifically — auto-loaded every session, so it needs its own copy rather than a pointer), and `docs/WORKFLOW.md`. `kotlin-expert-review`'s SKILL.md deliberately does *not* keep its own copy — its frontmatter description points at its own body instead of enumerating, to remove one of the copies.
 - **Module names**: canonical source is ADR-0001. Referenced (not copied in structure, just in name) throughout every other doc — a rename means a repo-wide search, not a single edit.
 
 ## What NOT to duplicate (fixed this session)

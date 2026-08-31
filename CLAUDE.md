@@ -1,14 +1,26 @@
-# CLAUDE.md — AfnaiHisab repo conventions
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## AfnaiHisab repo conventions
 
 Repo-level facts a session needs *before* touching code, so nothing here has to be re-derived by
 reading the tree (`docs/WORKFLOW.md` — "Project-root CLAUDE.md").
 
 - **What/why/when**: `AGENTS.md` (tool-agnostic contract), `docs/STATUS.md` (where the project
-  actually stands), `docs/PLAN.md` (phases), `docs/adr/` (decisions + rationale).
+  actually stands — read this first, it's updated every session), `docs/PLAN.md` (phases),
+  `docs/INDEX.md` (documentation map + change-impact table — check this if unsure what else needs
+  updating alongside a change), `docs/adr/` (decisions + rationale, one file per ADR,
+  `docs/adr/README.md` is the index), `docs/specs/<feature>.md` (EARS acceptance criteria per
+  feature, ADR-0016 — write one before implementing a feature).
 - **How this repo is laid out and run**: this file.
 
-Current phase: **Phase 0 complete** — scaffolding only. There is no auth, no ledger, no expense
-endpoint yet; Phase 1 (`docs/PLAN.md` §5) adds them, spec-first per ADR-0016.
+Current phase: **Phase 1, in progress.** Registration/login (JWT access+refresh) and a 6-endpoint
+ledger/expense/balance/settlement API are implemented in `server` and merged to `main` — see
+"API surface" below. Nothing in `web/` calls it yet; the only thing left for Phase 1's "done when"
+criterion is a minimal web UI (local auth, create a shared ledger, add an expense, view balances).
+Don't assume `web/` has any real pages/components beyond Next.js scaffolding — check before
+referencing one.
 
 ## Modules and what may depend on what (ADR-0001 — do not violate)
 
@@ -27,6 +39,29 @@ presentation. When a rule appears to need writing twice, that is the signal it b
 
 `core` is the reason Android/iOS are additive later instead of a rewrite — every shortcut taken in
 `server` is a Phase 3 reimplementation.
+
+## API surface (`server/src/main/kotlin/com/afnaihisab/server/routes/`)
+
+All under `/api/v1`, one route file per resource (`AuthRoutes`, `LedgerRoutes`, `ExpenseRoutes`,
+`BalanceRoutes`, `SettlementRoutes`, `HealthRoutes`):
+
+```
+GET  /health
+POST /auth/register
+POST /auth/login
+POST /ledgers
+POST /ledgers/{ledgerId}/members
+POST /ledgers/{ledgerId}/expenses
+GET  /ledgers/{ledgerId}/expenses
+GET  /ledgers/{ledgerId}/balances
+POST /ledgers/{ledgerId}/settlements
+```
+
+Every mutating route requires a bearer JWT (`type=ACCESS`, not a refresh token — checked
+explicitly), enforces ledger-membership authorization (ADR-0024), and accepts an idempotency key
+scoped by `(userId, idempotencyKey)` (ADR-0023) — never by the key alone, that was a real
+cross-tenant leak found and fixed during review. There is no `POST /auth/refresh` route yet even
+though `RefreshSessionRepository`'s rotation/reuse-detection logic exists and is tested.
 
 ## Package/naming conventions
 
@@ -91,11 +126,17 @@ Notes:
 ## Build, test, lint
 
 ```bash
-./gradlew build          # compile + ktlint + all JVM tests (core + server)
-./gradlew test           # tests only
-./gradlew ktlintFormat   # autofix Kotlin style
-cd web && npm run lint && npm run format:check && npm run build
+./gradlew build             # compile + ktlintCheck + detekt + all JVM tests (core + server)
+./gradlew test              # tests only
+./gradlew ktlintFormat      # autofix Kotlin style
+./gradlew ktlintCheck detekt  # lint only, no build/tests
+cd web && npm run lint && npm run format:check && npm run build   # build type-checks the app
 ```
+
+Single test: `./gradlew :core:jvmTest --tests "com.afnaihisab.core.domain.BalanceCalculationTest"`
+or `:server:test --tests "com.afnaihisab.server.routes.ExpenseRoutesTest"`. Detekt's ruleset lives
+at `config/detekt/detekt.yml`, wired into `check` (and thus CI) for both `core` and `server` — a
+violation fails the build exactly like a failing test.
 
 `.github/workflows/ci.yml` runs exactly these. Per ADR-0017 the CI result must *block* merges —
 that requires branch protection to be switched on in GitHub's settings; the workflow file alone
@@ -131,5 +172,7 @@ in the repo, shared by server + both future mobile clients.
 - Every error response must go through `ApplicationCall.respondError(...)` so it stays in the one
   envelope shape every client parses.
 - Human-review-required lanes (ADR-0017) — auth/tokens, balance & settle-up money math,
-  deletion/anonymization, the audit log's append-only guarantee. Flag a diff touching these
-  explicitly; they are never auto-approved.
+  deletion/anonymization, the audit log's append-only guarantee, ledger-membership authorization
+  (ADR-0024), and idempotency-key handling (ADR-0023). Flag a diff touching these explicitly; they
+  are never auto-approved regardless of how the change was generated. This list can drift — check
+  ADR-0017 and its amendments if unsure, per `docs/INDEX.md`.
